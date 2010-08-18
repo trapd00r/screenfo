@@ -4,6 +4,14 @@ use Data::Dumper;
 
 my $DEBUG = 0;
 
+require("./screenfo.conf");
+if($@) {
+  warn($@);
+}
+
+
+# imported from configuration file
+our($now_playing, $default_colorscheme);
 my %wm_list = (
   ratpoison => 'ratpoison',
   stumpwm   => 'stumpwm',
@@ -55,13 +63,12 @@ sub get_gtk_info {
 }
 
 sub print_out {
-  my $color = shift // 'all';
+  my $color = shift // $default_colorscheme // 'all';
 
   open(my $fh, '<', './archlogo') or die($!);
   my @logo = <$fh>;
   close($fh);
   my $i=0;
-
 
   my %colorschemes = (
     pink  => [53,54,55,56,57,89,161,162,163,164,165,197,198,199,200,201,125,126,127,128],
@@ -101,12 +108,16 @@ sub print_out {
   $final_logo[5] = $final_logo[5] . sprintf("\033[0m%26s: ", 'GTK Icons') . get_gtk_info('icons');
   $final_logo[6] = $final_logo[6] . sprintf("\033[0m%25s: ", 'GTK Font') . get_gtk_info('font');
   $final_logo[7] = $final_logo[7] . sprintf("\033[0m%24s: ", 'GTK Toolbar') . get_gtk_info('toolbar');
+  $final_logo[8] = $final_logo[8] . sprintf("\033[0m%23s: ", 'Playing') . $now_playing->();
+
   return(\@final_logo);
 }
 
-my $output = print_out(shift);
+my $output = print_out();
 print "$_\n" for @{$output};
 
 sub get_wm { return('ratpoison'); }
 
 sub get_os { return($^O); }
+
+# vim: set tw=0 nowrap:
