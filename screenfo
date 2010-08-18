@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 use strict;
 use Data::Dumper;
+use List::Util qw(shuffle);
 
 my $DEBUG = 0;
 
@@ -80,6 +81,8 @@ sub print_out {
   $color = $colorschemes{$color};
 
   my @final_logo = ();
+  @$color = shuffle(@$color);
+
   for(split(//, join('', @logo))) {
     if($i == scalar(@$color)) {
       $i = 0;
@@ -113,7 +116,7 @@ sub print_out {
   return(\@final_logo);
 }
 
-my $output = print_out();
+my $output = print_out(shift);
 print "$_\n" for @{$output};
 
 sub get_wm { return('ratpoison'); }
