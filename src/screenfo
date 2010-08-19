@@ -1,0 +1,147 @@
+#!/usr/bin/perl
+use strict;
+use Data::Dumper;
+use List::Util qw(shuffle);
+use String::Utils qw(longest);
+
+my $DEBUG = 0;
+
+require("./screenfo.conf");
+if($@) {
+  warn($@);
+}
+
+
+# imported from configuration file
+our($now_playing, $default_colorscheme);
+my %wm_list = (
+  ratpoison => 'ratpoison',
+  stumpwm   => 'stumpwm',
+  dwm       => 'dwm',
+  wmii      => 'wmii',
+);
+
+my @c = ();
+for(my $i=0; $i<255;++$i) {
+  push(@c, "\033[38;5;$i" . 'm');
+}
+
+sub get_kernel {
+  open(my $fh, '<', '/proc/version') or warn($!);
+  my $version = <$fh>;
+  my ($kernel) = $version =~ /(2\.[0-9]\.[0-9]+)/;
+  return($kernel);
+}
+
+sub get_gtk_info {
+  my $wanted = shift // 'theme';
+  my ($gtk_theme, $gtk_font, $gtk_icons, $gtk_toolbar_style) = undef;
+  if(-f "$ENV{HOME}/.gtkrc-2.0") {
+    open(my $fh, '<', "$ENV{HOME}/.gtkrc-2.0") or warn($!);
+    while(<$fh>) {
+      if(/gtk-theme-name="(.+)"/) {
+        $gtk_theme = $1;
+        print "GTK Theme: $gtk_theme\n" if($DEBUG);
+      }
+      if(/gtk-icon-theme-name="(.+)"/) {
+        $gtk_icons = $1;
+        print "GTK Icons: $gtk_icons\n" if($DEBUG);
+      }
+      if(/gtk-font-name="(.+)"/) {
+        $gtk_font = $1;
+        print "GTK Font: $gtk_font\n" if($DEBUG);
+      }
+      if(/gtk-toolbar-style=([0-9]+)/) {
+        $gtk_toolbar_style = $1;
+        print "GTK Toolbar Style: $gtk_toolbar_style\n" if($DEBUG);
+      }
+    }
+  }
+  return($gtk_theme)         if($wanted eq 'theme');
+  return($gtk_icons)         if($wanted eq 'icons');
+  return($gtk_font)          if($wanted eq 'font');
+  return($gtk_toolbar_style) if($wanted eq 'toolbar');
+  return(-1);
+}
+
+sub print_out {
+  my $color = shift // $default_colorscheme // 'all';
+  my $logo = './ascii/arch-new';
+
+  open(my $fh, '<', $logo) or die($!);
+  my @logo = <$fh>;
+  close($fh);
+
+  my %colorschemes = (
+    pink  => [53,54,55,56,57,89,161,162,163,164,165,197,198,199,200,201,125,126,127,128],
+    green => [22,28,34,35,40,46,47,70,76,82,100,106,112,118,148,154],
+    grey  => [233..250],
+    all   => [17..255],
+    ansi  => [0..16],
+  );
+
+  if(exists($colorschemes{$color})) {
+    $color = $colorschemes{$color};
+  }
+  else {
+    $color = $colorschemes{ansi};
+  }
+
+  my @final_logo = ();
+  @$color = shuffle(@$color);
+
+  my $i=0;
+  for(split(//, join('', @logo))) {
+    if($i == scalar(@$color)-1) {
+      $i = 0;
+      }
+    if($_ eq ' ') {
+      push(@final_logo, "$_");
+    }
+    else {
+      push(@final_logo, "$_");
+      #push(@final_logo, "\033[38;5;" . @$color[$i] . "m$_\033[0m");
+    }
+    $i++;
+  }
+  my $f = join('', @final_logo);
+  @final_logo = split(/\n/, $f);
+
+  my $spacing = longest(@final_logo) - 20;
+
+
+  #FIXME - get the length of the longest string and add 2 x ' ' whereby we print the info
+  # Use String::Utils?
+
+  #$final_logo[0] = sprintf("%s: %s %${spacing}s: ", 'OS' , get_os(), $final_logo[0]);
+  #$final_logo[1] = sprintf("%s: %s %${spacing}s: ", 'Kernel' , get_kernel(), $final_logo[1]);
+  #$final_logo[2] = sprintf("%s: %s %${spacing}s: ", 'WM' , get_wm(), $final_logo[2]);
+  #$final_logo[3] = sprintf("%s: %s %${spacing}s: ", 'GTK Theme' , get_gtk_info(), $final_logo[3]);
+  #$final_logo[4] = sprintf("%s: %s %${spacing}s: ", 'GTK Icons' , get_gtk_info('icons'), $final_logo[4]);
+  #$final_logo[5] = sprintf("%s: %s %${spacing}s: ", 'GTK Font' , get_gtk_info('font'), $final_logo[5]);
+  #$final_logo[6] = sprintf("%s: %s %${spacing}s: ", 'GTK Toolbar Style' , get_gtk_info('toolbar'), $final_logo[6]);
+
+  return(\@final_logo);
+}
+
+my $output = print_out(shift,shift);
+
+my $long = longest(@$output);
+
+#for(@$output) {
+#  printf("%-${long}s   %s\n", $_, $long);
+#}
+
+@$output[0] = sprintf("%-${long}s %7s: %s", @$output[0], 'OS', get_os());
+@$output[1] = sprintf("%-${long}s %7s: %s", @$output[1], 'WM', get_wm());
+@$output[2] = sprintf("%-${long}s %7s: %s", @$output[2], 'Kernel', get_kernel());
+
+for(@$output) {
+  print "$_\n";
+}
+
+sub get_wm { return('ratpoison'); }
+
+sub get_os { return($^O); }
+
+# vim: set tw=0 nowrap:
