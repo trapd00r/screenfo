@@ -3,6 +3,7 @@ use strict;
 use Data::Dumper;
 use List::Util qw(shuffle);
 use String::Utils qw(longest);
+use Getopt::Long;
 
 my $DEBUG = 0;
 
@@ -13,18 +14,16 @@ if($@) {
 
 
 # imported from configuration file
-our($now_playing, $default_colorscheme);
-my %wm_list = (
-  ratpoison => 'ratpoison',
-  stumpwm   => 'stumpwm',
-  dwm       => 'dwm',
-  wmii      => 'wmii',
-);
+our($now_playing, $default_colorscheme, %colorschemes, $default_logo);
 
-my @c = ();
-for(my $i=0; $i<255;++$i) {
-  push(@c, "\033[38;5;$i" . 'm');
-}
+
+GetOptions(
+  'logo:s'  => \$default_logo,
+  'color:s' => \$default_colorscheme,
+  help      =>  \&usage,
+);
+$default_logo = "./ascii/$default_logo"; # FIXME
+
 
 sub get_kernel {
   open(my $fh, '<', '/proc/version') or warn($!);
@@ -65,20 +64,12 @@ sub get_gtk_info {
 }
 
 sub print_out {
-  my $color = shift // $default_colorscheme // 'all';
-  my $logo = './ascii/bsd';
+  my $color = $default_colorscheme;
+  my $logo = $default_logo;
 
   open(my $fh, '<', $logo) or die($!);
   my @logo = <$fh>;
   close($fh);
-
-  my %colorschemes = (
-    pink  => [53,54,55,56,57,89,161,162,163,164,165,197,198,199,200,201,125,126,127,128],
-    green => [22,28,34,35,40,46,47,70,76,82,100,106,112,118,148,154],
-    grey  => [233..250],
-    all   => [17..255],
-    ansi  => [0..16],
-  );
 
   if(exists($colorschemes{$color})) {
     $color = $colorschemes{$color};
@@ -89,13 +80,15 @@ sub print_out {
 
   @$color = shuffle(@$color);
 
+  #FIXME
   my $f = join('', @logo);
   @logo = split(/\n/, $f);
+  #FIXME
 
   return(\@logo);
 }
 
-my $output = print_out(shift,shift);
+my $output = print_out($default_colorscheme, $default_logo);
 
 my $long = longest(@$output);
 
@@ -136,19 +129,28 @@ sub colorme {
   my @foo = @_;
   my $f = join('', @foo);
   my @data = split(//, $f);
-  my $i = 106;
   my @toreturn;
-  my @allcolors = shuffle((16..250));
 
+  my $colorizer = undef;
+  if(exists($colorschemes{$default_colorscheme})) {
+    $colorizer = $colorschemes{$default_colorscheme};
+  }
+  else {
+    $colorizer = $colorschemes{ansi};
+  }
+
+  @$colorizer = shuffle(@$colorizer);
+
+  my $i = 0;
   for(@data) {
-    if($i == 250) {
+    if($i == scalar(@$colorizer)-1) {
       $i = 0;
     }
     if($_ eq '') {
       push(@toreturn, $_);
     }
     else {
-      push(@toreturn, "\e[38;5;$allcolors[$i]" . 'm' . $_ . "\e[0m");
+      push(@toreturn, "\e[38;5;@$colorizer[$i]" . 'm' . $_ . "\e[0m");
     }
     $i++;
   }
@@ -158,5 +160,9 @@ sub colorme {
 sub get_wm { return('ratpoison'); }
 
 sub get_os { return($^O); }
+
+sub usage {
+  print "--logo logo\n--color color\n" and exit(0);
+}
 
 # vim: set tw=0 nowrap:
