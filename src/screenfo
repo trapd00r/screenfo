@@ -66,7 +66,7 @@ sub get_gtk_info {
 
 sub print_out {
   my $color = shift // $default_colorscheme // 'all';
-  my $logo = './ascii/arch-new';
+  my $logo = './ascii/bsd';
 
   open(my $fh, '<', $logo) or die($!);
   my @logo = <$fh>;
@@ -87,57 +87,72 @@ sub print_out {
     $color = $colorschemes{ansi};
   }
 
-  my @final_logo = ();
   @$color = shuffle(@$color);
 
-  my $i=0;
-  for(split(//, join('', @logo))) {
-    if($i == scalar(@$color)-1) {
-      $i = 0;
-      }
-    if($_ eq ' ') {
-      push(@final_logo, "$_");
-    }
-    else {
-      push(@final_logo, "$_");
-      #push(@final_logo, "\033[38;5;" . @$color[$i] . "m$_\033[0m");
-    }
-    $i++;
-  }
-  my $f = join('', @final_logo);
-  @final_logo = split(/\n/, $f);
+  my $f = join('', @logo);
+  @logo = split(/\n/, $f);
 
-  my $spacing = longest(@final_logo) - 20;
-
-
-  #FIXME - get the length of the longest string and add 2 x ' ' whereby we print the info
-  # Use String::Utils?
-
-  #$final_logo[0] = sprintf("%s: %s %${spacing}s: ", 'OS' , get_os(), $final_logo[0]);
-  #$final_logo[1] = sprintf("%s: %s %${spacing}s: ", 'Kernel' , get_kernel(), $final_logo[1]);
-  #$final_logo[2] = sprintf("%s: %s %${spacing}s: ", 'WM' , get_wm(), $final_logo[2]);
-  #$final_logo[3] = sprintf("%s: %s %${spacing}s: ", 'GTK Theme' , get_gtk_info(), $final_logo[3]);
-  #$final_logo[4] = sprintf("%s: %s %${spacing}s: ", 'GTK Icons' , get_gtk_info('icons'), $final_logo[4]);
-  #$final_logo[5] = sprintf("%s: %s %${spacing}s: ", 'GTK Font' , get_gtk_info('font'), $final_logo[5]);
-  #$final_logo[6] = sprintf("%s: %s %${spacing}s: ", 'GTK Toolbar Style' , get_gtk_info('toolbar'), $final_logo[6]);
-
-  return(\@final_logo);
+  return(\@logo);
 }
 
 my $output = print_out(shift,shift);
 
 my $long = longest(@$output);
 
-#for(@$output) {
-#  printf("%-${long}s   %s\n", $_, $long);
-#}
+@$output[0] = sprintf(
+  "%-${long}s %12s: %s", @$output[0], 'OS', ucfirst(get_os())
+);
+@$output[1] = sprintf(
+  "%-${long}s %12s: %s", @$output[1], 'WM', ucfirst(get_wm())
+);
+@$output[2] = sprintf(
+  "%-${long}s %12s: %s", @$output[2], 'Kernel', get_kernel()
+);
+@$output[3] = sprintf(
+  "%-${long}s %12s: %s", @$output[3], 'Theme', ucfirst(get_gtk_info())
+);
+@$output[4] = sprintf(
+  "%-${long}s %12s: %s", @$output[4], 'Icons', ucfirst(get_gtk_info('icons'))
+);
+@$output[5] = sprintf(
+  "%-${long}s %12s: %s", @$output[5], 'Font', ucfirst(get_gtk_info('font'))
+);
+@$output[6] = sprintf(
+  "%-${long}s %12s: %s", @$output[6], 'Toolbar', get_gtk_info('toolbar')
+);
 
-@$output[0] = sprintf("%-${long}s %7s: %s", @$output[0], 'OS', get_os());
-@$output[1] = sprintf("%-${long}s %7s: %s", @$output[1], 'WM', get_wm());
-@$output[2] = sprintf("%-${long}s %7s: %s", @$output[2], 'Kernel', get_kernel());
 
 for(@$output) {
-  print "$_\n";
+  # Ugliest hack ever... FIXME
+  if(/(.+)\s+([A-Za-z]+: .+)/) {
+    print colorme($1), $2, "\n";
+  }
+  else {
+    print colorme($_),"\n";
+  }
+}
+
+sub colorme {
+  my @foo = @_;
+  my $f = join('', @foo);
+  my @data = split(//, $f);
+  my $i = 106;
+  my @toreturn;
+  my @allcolors = shuffle((16..250));
+
+  for(@data) {
+    if($i == 250) {
+      $i = 0;
+    }
+    if($_ eq '') {
+      push(@toreturn, $_);
+    }
+    else {
+      push(@toreturn, "\e[38;5;$allcolors[$i]" . 'm' . $_ . "\e[0m");
+    }
+    $i++;
+  }
+  return(@toreturn);
 }
 
 sub get_wm { return('ratpoison'); }
