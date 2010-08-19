@@ -93,25 +93,25 @@ my $output = print_out($default_colorscheme, $default_logo);
 my $long = longest(@$output);
 
 @$output[0] = sprintf(
-  "%-${long}s %12s: %s", @$output[0], 'OS', ucfirst(get_os())
+  "%-${long}s %12s: \e[1m%s\e[0m", @$output[0], 'OS', ucfirst(get_os())
 );
 @$output[1] = sprintf(
-  "%-${long}s %12s: %s", @$output[1], 'WM', ucfirst(get_wm())
+  "%-${long}s %12s: \e[1m%s\e[0m", @$output[1], 'WM', ucfirst(get_wm())
 );
 @$output[2] = sprintf(
-  "%-${long}s %12s: %s", @$output[2], 'Kernel', get_kernel()
+  "%-${long}s %12s: \e[1m%s\e[0m", @$output[2], 'Kernel', get_kernel()
 );
 @$output[3] = sprintf(
-  "%-${long}s %12s: %s", @$output[3], 'Theme', ucfirst(get_gtk_info())
+  "%-${long}s %12s: \e[1m%s\e[0m", @$output[3], 'Theme', ucfirst(get_gtk_info())
 );
 @$output[4] = sprintf(
-  "%-${long}s %12s: %s", @$output[4], 'Icons', ucfirst(get_gtk_info('icons'))
+  "%-${long}s %12s: \e[1m%s\e[0m", @$output[4], 'Icons', ucfirst(get_gtk_info('icons'))
 );
 @$output[5] = sprintf(
-  "%-${long}s %12s: %s", @$output[5], 'Font', ucfirst(get_gtk_info('font'))
+  "%-${long}s %12s: \e[1m%s\e[0m", @$output[5], 'Font', ucfirst(get_gtk_info('font'))
 );
 @$output[6] = sprintf(
-  "%-${long}s %12s: %s", @$output[6], 'Toolbar', get_gtk_info('toolbar')
+  "%-${long}s %12s: \e[1m%s\e[0m", @$output[6], 'Toolbar', get_gtk_info('toolbar')
 );
 
 
@@ -165,4 +165,4 @@ sub usage {
   print "--logo logo\n--color color\n" and exit(0);
 }
 
-# vim: set tw=0 nowrap:
+# vim: set tw=0 nowrap: #FIXME
