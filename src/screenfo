@@ -4,6 +4,7 @@ use Data::Dumper;
 use List::Util qw(shuffle);
 use String::Utils qw(longest);
 use Getopt::Long;
+use Pod::Usage;
 
 my $DEBUG = 0;
 
@@ -15,12 +16,15 @@ if($@) {
 
 # imported from configuration file
 our($now_playing, $default_colorscheme, %colorschemes, $default_logo);
+our($opt_random_colors) = undef;
 
 
 GetOptions(
   'logo:s'  => \$default_logo,
   'color:s' => \$default_colorscheme,
-  help      =>  \&usage,
+  'lc'      => \&available_colorschemes,
+  'random'  => \$opt_random_colors,
+  'help'    => sub { pod2usage(verbose => 1) and exit(0); },
 );
 $default_logo = "./ascii/$default_logo"; # FIXME
 
@@ -30,6 +34,12 @@ sub get_kernel {
   my $version = <$fh>;
   my ($kernel) = $version =~ /(2\.[0-9]\.[0-9]+)/;
   return($kernel);
+}
+
+sub get_no_proc {
+  opendir(my $dh, '/proc') or warn($!);
+  my @processes = grep{/^[0-9]+/} readdir($dh); # PIDs
+  return(scalar(@processes));
 }
 
 sub get_gtk_info {
@@ -63,6 +73,53 @@ sub get_gtk_info {
   return(-1);
 }
 
+sub get_disk_total {
+  my $wanted = shift // 'size';
+  open(my $df, '-|', 'df -h --total') or warn($!);
+  my($size,$used,$avail,$percent);
+  while(<$df>) {
+    if(/^total\s+([0-9.MGTP]+)\s+([0-9.MGTP]+)\s+([0-9.MGTP]+)\s+([0-9]+%)/) {
+      ($size,$used,$avail,$percent) = ($1,$2,$3,$4);
+    }
+  }
+  return($size)    if($wanted eq 'size');
+  return($used)    if($wanted eq 'used');
+  return($avail)   if($wanted eq 'avail');
+  return($percent) if($wanted eq 'percent');
+  return(-1);
+}
+
+get_mem();
+sub get_mem {
+  my $wanted = shift // 'free';
+  open(my $fh, '<', '/proc/meminfo') or warn($!);
+  my ($total,$free,$buffers,$cached) = undef;
+  while(<$fh>) {
+    if(/^MemTotal:\s+([0-9]+)\s+/) {
+      $total = to_mb($1);
+    }
+    elsif(/^MemFree:\s+([0-9]+)\s+/) {
+      $free = to_mb($1);
+    }
+    elsif(/^Buffers:\s+([0-9]+)\s+/) {
+      $buffers = to_mb($1);
+    }
+    elsif(/^Cached:\s+([0-9]+)/) {
+      $cached = to_mb($1);
+    }
+  }
+  my $avail = $free + ($buffers + $cached);
+  my $used  = $total - $avail;
+  return($avail) if($wanted eq 'avail');
+  return($used)  if($wanted eq 'used');
+  return($total) if($wanted eq 'total');
+}
+
+sub to_mb {
+  my $kb = shift;
+  return(sprintf("%d",$kb/1024));
+}
+
 sub print_out {
   my $color = $default_colorscheme;
   my $logo = $default_logo;
@@ -78,7 +135,7 @@ sub print_out {
     $color = $colorschemes{ansi};
   }
 
-  @$color = shuffle(@$color);
+  @$color = shuffle(@$color) if($opt_random_colors);
 
   #FIXME
   my $f = join('', @logo);
@@ -114,6 +171,21 @@ my $long = longest(@$output);
   "%-${long}s %12s: \e[1m%s\e[0m", @$output[6], 'Toolbar', get_gtk_info('toolbar')
 );
 
+@$output[7] = sprintf(
+  "%-${long}s %12s: \e[1m\e[38;5;106m%s\e[0m/%s (\e[38;5;196m%s\e[0m)", 
+  @$output[7], 'Disk',
+  get_disk_total('avail'), get_disk_total('size'), get_disk_total('percent'),
+);
+
+@$output[8] = sprintf(
+  "%-${long}s %12s: \e[1m%s\e[0m", @$output[8], 'Processes', get_no_proc(),
+);
+
+@$output[9] = sprintf(
+  "%-${long}s %12s: \e[38;5;240m%s/\e[1m%s\e[0m used", @$output[9], 'Memory', get_mem('used'), 
+  get_mem('total'),
+);
+
 
 for(@$output) {
   # Ugliest hack ever... FIXME
@@ -139,7 +211,7 @@ sub colorme {
     $colorizer = $colorschemes{ansi};
   }
 
-  @$colorizer = shuffle(@$colorizer);
+  @$colorizer = shuffle(@$colorizer) if($opt_random_colors);
 
   my $i = 0;
   for(@data) {
@@ -161,8 +233,25 @@ sub get_wm { return('ratpoison'); }
 
 sub get_os { return($^O); }
 
-sub usage {
-  print "--logo logo\n--color color\n" and exit(0);
+sub available_colorschemes {
+  print "$_\n" for(sort(keys(%colorschemes)));
+  exit(0);
 }
 
+=pod
+
+=head1 SYNOPSIS
+
+  screenfo
+
+=head1 OPTIONS
+
+  -c,   --color     specify colorscheme to use
+  -lc,  --listc     list available colorschemes
+  -l,   --logo      specify ascii art to use
+  -r,   --random    randomize the colors
+
+  -h,   --help      show help and exit
+
+=cut
 # vim: set tw=0 nowrap: #FIXME
