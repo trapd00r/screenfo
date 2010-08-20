@@ -182,10 +182,9 @@ my $long = longest(@$output);
 );
 
 @$output[9] = sprintf(
-  "%-${long}s %12s: \e[38;5;240m%s/\e[1m%s\e[0m used", @$output[9], 'Memory', get_mem('used'), 
-  get_mem('total'),
+  "%-${long}s %12s: \e[38;5;240m%s\e[0mM/\e[1m\e[38;5;240m%s\e[0mM used",
+  @$output[9], 'Memory', get_mem('used'), get_mem('total'),
 );
-
 
 for(@$output) {
   # Ugliest hack ever... FIXME
