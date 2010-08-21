@@ -15,14 +15,15 @@ if($@) {
 
 
 # imported from configuration file
-our($now_playing, $default_colorscheme, %colorschemes, $default_logo);
+our($now_playing, $default_colorscheme, %colorschemes, $default_logo,
+    $color_support);
 our($opt_random_colors) = undef;
 
 
 GetOptions(
-  'ascii:s'  => \$default_logo,
+  'ascii:s' => \$default_logo,
   'color:s' => \$default_colorscheme,
-  'list'      => \&available_colorschemes,
+  'list'    => \&available_colorschemes,
   'norand'  => \$opt_random_colors,
   'help'    => sub { pod2usage(verbose => 1) and exit(0); },
 );
