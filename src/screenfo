@@ -20,10 +20,10 @@ our($opt_random_colors) = undef;
 
 
 GetOptions(
-  'logo:s'  => \$default_logo,
+  'ascii:s'  => \$default_logo,
   'color:s' => \$default_colorscheme,
-  'lc'      => \&available_colorschemes,
-  'random'  => \$opt_random_colors,
+  'list'      => \&available_colorschemes,
+  'norand'  => \$opt_random_colors,
   'help'    => sub { pod2usage(verbose => 1) and exit(0); },
 );
 $default_logo = "./ascii/$default_logo"; # FIXME
@@ -210,7 +210,7 @@ sub colorme {
     $colorizer = $colorschemes{ansi};
   }
 
-  @$colorizer = shuffle(@$colorizer) if($opt_random_colors);
+  @$colorizer = shuffle(@$colorizer) unless($opt_random_colors);
 
   my $i = 0;
   for(@data) {
@@ -246,9 +246,9 @@ sub available_colorschemes {
 =head1 OPTIONS
 
   -c,   --color     specify colorscheme to use
-  -lc,  --listc     list available colorschemes
-  -l,   --logo      specify ascii art to use
-  -r,   --random    randomize the colors
+  -l,   --list      list available colorschemes
+  -a,   --ascii     specify ascii art to use
+  -n,   --noran     turn off randomizing of colors
 
   -h,   --help      show help and exit
 
