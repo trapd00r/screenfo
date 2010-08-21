@@ -89,7 +89,6 @@ sub get_disk_total {
   return(-1);
 }
 
-get_mem();
 sub get_mem {
   my $wanted = shift // 'free';
   open(my $fh, '<', '/proc/meminfo') or warn($!);
@@ -120,6 +119,29 @@ sub to_mb {
   return(sprintf("%d",$kb/1024));
 }
 
+sub get_uptime {
+  my $wanted = shift // 'days';
+  chomp(my $uptime = `uptime`);
+  $uptime =~ s/.+ up //;
+
+  my ($days,$mins,$users) = split(/,/, $uptime, 4);
+  $days  =~ s/^\s+//;
+  $mins  =~ s/^\s+//;
+  $users =~ s/^\s+//;
+
+  return($days)  if($wanted eq 'days');
+  return($mins)  if($wanted eq 'mins');
+  return($users) if($wanted eq 'users');
+}
+
+sub get_shell    { return($ENV{SHELL}); }
+sub get_terminal { return($ENV{TERM}); }
+
+sub get_cpu {
+  chomp(my $cpu = `uname -p`);
+  return($cpu);
+}
+
 sub print_out {
   my $color = $default_colorscheme;
   my $logo = $default_logo;
@@ -143,57 +165,6 @@ sub print_out {
   #FIXME
 
   return(\@logo);
-}
-
-my $output = print_out($default_colorscheme, $default_logo);
-
-my $long = longest(@$output);
-
-@$output[0] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m", @$output[0], 'OS', ucfirst(get_os())
-);
-@$output[1] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m", @$output[1], 'WM', ucfirst(get_wm())
-);
-@$output[2] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m", @$output[2], 'Kernel', get_kernel()
-);
-@$output[3] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m", @$output[3], 'Theme', ucfirst(get_gtk_info())
-);
-@$output[4] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m", @$output[4], 'Icons', ucfirst(get_gtk_info('icons'))
-);
-@$output[5] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m", @$output[5], 'Font', ucfirst(get_gtk_info('font'))
-);
-@$output[6] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m", @$output[6], 'Toolbar', get_gtk_info('toolbar')
-);
-
-@$output[7] = sprintf(
-  "%-${long}s %12s: \e[1m\e[38;5;106m%s\e[0m/%s (\e[38;5;196m%s\e[0m)", 
-  @$output[7], 'Disk',
-  get_disk_total('avail'), get_disk_total('size'), get_disk_total('percent'),
-);
-
-@$output[8] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m", @$output[8], 'Processes', get_no_proc(),
-);
-
-@$output[9] = sprintf(
-  "%-${long}s %12s: \e[38;5;240m%s\e[0mM/\e[1m\e[38;5;240m%s\e[0mM used",
-  @$output[9], 'Memory', get_mem('used'), get_mem('total'),
-);
-
-for(@$output) {
-  # Ugliest hack ever... FIXME
-  if(/(.+)\s+([A-Za-z]+: .+)/) {
-    print colorme($1), $2, "\n";
-  }
-  else {
-    print colorme($_),"\n";
-  }
 }
 
 sub colorme {
@@ -235,6 +206,86 @@ sub get_os { return($^O); }
 sub available_colorschemes {
   print "$_\n" for(sort(keys(%colorschemes)));
   exit(0);
+}
+
+my $output = print_out($default_colorscheme, $default_logo);
+
+my $long = longest(@$output);
+
+@$output[0] = sprintf(
+  "%-${long}s %12s: \e[1m%s\e[0m", @$output[0], 'OS', ucfirst(get_os())
+);
+@$output[1] = sprintf(
+  "%-${long}s %12s: \e[1m%s\e[0m", @$output[1], 'WM', ucfirst(get_wm())
+);
+@$output[2] = sprintf(
+  "%-${long}s %12s: \e[1m%s\e[0m", @$output[2], 'Kernel', get_kernel()
+);
+@$output[3] = sprintf(
+  "%-${long}s %12s: \e[1m%s\e[0m", @$output[3], 'Theme',
+  ucfirst(get_gtk_info())
+);
+@$output[4] = sprintf(
+  "%-${long}s %12s: \e[1m%s\e[0m", @$output[4], 'Icons',
+  ucfirst(get_gtk_info('icons'))
+);
+@$output[5] = sprintf(
+  "%-${long}s %12s: \e[1m%s\e[0m", @$output[5], 'Font', 
+  ucfirst(get_gtk_info('font'))
+);
+@$output[6] = sprintf(
+  "%-${long}s %12s: \e[1m%s\e[0m", @$output[6], 'Toolbar', 
+  get_gtk_info('toolbar')
+);
+
+@$output[7] = sprintf(
+  "%-${long}s %12s: \e[1m\e[38;5;106m%s\e[0m/%s (\e[38;5;196m%s\e[0m)", 
+  @$output[7], 'Disk',
+  get_disk_total('avail'), get_disk_total('size'), get_disk_total('percent'),
+);
+
+@$output[8] = sprintf(
+  "%-${long}s %12s: \e[1m%s\e[0m", @$output[8], 'Processes', get_no_proc(),
+);
+
+@$output[9] = sprintf(
+  "%-${long}s %12s: \e[38;5;240m%s\e[0mM/\e[1m\e[38;5;240m%s\e[0mM used",
+  @$output[9], 'Memory', get_mem('used'), get_mem('total'),
+);
+
+@$output[10] = sprintf(
+  "%-${long}s %12s: \e[1m%s\e[0m and %sutes", @$output[10], 'Uptime',
+  get_uptime('days'), get_uptime('mins'),
+);
+
+@$output[11] = sprintf(
+  "%-${long}s %12s: \e[1m%s\e[0m %s", @$output[11], 'Users',
+  get_uptime('users'),
+);
+
+@$output[12] = sprintf(
+  "%-${long}s %12s: \e[1m%s\e[0m %s", @$output[12], 'Shell',
+  get_shell(),
+);
+
+@$output[13] = sprintf(
+  "%-${long}s %12s: \e[1m%s\e[0m %s", @$output[13], 'Terminal',
+  get_terminal(),
+);
+
+@$output[14] = sprintf(
+  "%-${long}s %12s: \e[1m%s\e[0m %s", @$output[14], 'CPU',
+  get_cpu,
+);
+
+for(@$output) {
+  # Ugliest hack ever... FIXME
+  if(/(.+)\s+([A-Za-z]+: .+)/) {
+    print colorme($1), $2, "\n";
+  }
+  else {
+    print colorme($_),"\n";
+  }
 }
 
 =pod
