@@ -8,9 +8,13 @@ use Pod::Usage;
 
 my $DEBUG = 0;
 
-require("./screenfo.conf");
+eval { require("$ENV{XDG_CONFIG_HOME}/screenfo/screenfo.conf"); };
 if($@) {
-  warn($@);
+  eval { require('/etc/screenfo.conf'); };
+  if($@) {
+    print STDERR "No configuration file found\n";
+    exit(-1);
+  }
 }
 
 # imported from configuration file
@@ -261,12 +265,10 @@ my $long = longest(@$output);
   ucfirst(get_gtk_info('font'))
 );
 
-=who_cares
 @$output[6] = sprintf(
   "%-${long}s %12s: \e[1m%s\e[0m", @$output[6], 'Toolbar', 
   get_gtk_info('toolbar')
 );
-=cut
 
 @$output[7] = sprintf(
   "%-${long}s %12s: \e[1m\e[38;5;106m%s\e[0m/%s (\e[38;5;196m%s\e[0m)", 
