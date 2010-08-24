@@ -147,11 +147,18 @@ sub get_no_users {
   return(sprintf("%d (%s)", scalar(@users), join(', ', @users)));
 }
 
-sub get_shell    { return($ENV{SHELL}); }
+sub get_shell {
+  my $shell = $ENV{SHELL};
+  return(-1) unless(defined($shell));
+  $shell =~ s;.+/(.+)$;$1;;
+  return($shell);
+}
+
 sub get_terminal { return($ENV{TERM}); }
 
 sub get_cpu {
   chomp(my $cpu = `uname -p`);
+  return(-1) unless(defined($cpu));
   return($cpu);
 }
 
