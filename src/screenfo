@@ -1,4 +1,6 @@
 #!/usr/bin/perl
+our $APP     = 'screenfo';
+our $VERSION = 0.2;
 use strict;
 use Data::Dumper;
 use List::Util qw(shuffle);
@@ -29,6 +31,7 @@ GetOptions(
   'list'    => \&available_colorschemes,
   'norand'  => \$opt_random_colors,
   'help'    => sub { pod2usage(verbose => 1) and exit(0); },
+  'version' => sub { printf("%s %s\n", $APP, $VERSION); exit(0); },
 );
 $default_logo = "./ascii/$default_logo"; # FIXME
 
@@ -264,48 +267,38 @@ my $long = longest(@$output);
   "%-${long}s %12s: \e[1m%s\e[0m", @$output[5], 'Font', 
   ucfirst(get_gtk_info('font'))
 );
-
 @$output[6] = sprintf(
   "%-${long}s %12s: \e[1m%s\e[0m", @$output[6], 'Toolbar', 
   get_gtk_info('toolbar')
 );
-
 @$output[7] = sprintf(
   "%-${long}s %12s: \e[1m\e[38;5;106m%s\e[0m/%s (\e[38;5;196m%s\e[0m)", 
   @$output[7], 'Disk',
   get_disk_total('avail'), get_disk_total('size'), get_disk_total('percent'),
 );
-
 @$output[8] = sprintf(
   "%-${long}s %12s: \e[1m%s\e[0m", @$output[8], 'Processes', get_no_proc(),
 );
-
 @$output[9] = sprintf(
   "%-${long}s %12s: \e[38;5;240m%s\e[0mM/\e[1m\e[38;5;240m%s\e[0mM used",
   @$output[9], 'Memory', get_mem('used'), get_mem('total'),
 );
-
-#FIXME
 @$output[10] = sprintf(
   "%-${long}s %12s: \e[1m%s\e[0m and \e[1m%s\e[0m", @$output[10], 'Uptime',
   get_uptime('days'), get_uptime('mins'),
 );
-
 @$output[11] = sprintf(
   "%-${long}s %12s: \e[1m%s\e[0m %s", @$output[11], 'Users',
   get_no_users()
 );
-
 @$output[12] = sprintf(
   "%-${long}s %12s: \e[1m%s\e[0m %s", @$output[12], 'Shell',
   get_shell(),
 );
-
 @$output[13] = sprintf(
   "%-${long}s %12s: \e[1m%s\e[0m %s", @$output[13], 'Terminal',
   get_terminal(),
 );
-
 @$output[14] = sprintf(
   "%-${long}s %12s: \e[1m%s\e[0m %s", @$output[14], 'CPU',
   get_cpu,
@@ -329,9 +322,21 @@ for(@$output) {
 
 =pod
 
+=head1 NAME
+
+  screenfo - screenshot information tool
+
 =head1 SYNOPSIS
 
-  screenfo
+Everybody like 'The monthly screenshot thread' where one is supposed to show
+off their latest setup.
+
+Nobody likes screenshots that look awesome, but where there's no information 
+at all available.
+
+B<screenfo> outputs a load of system information, including the running window
+manager, GTK theme, icons, fonts, shell, terminal emulator, and much more, 
+while taking the screenshot.
 
 =head1 OPTIONS
 
@@ -341,6 +346,63 @@ for(@$output) {
   -n,   --noran     turn off randomizing of colors
 
   -h,   --help      show help and exit
+  -v,   --version   show version info and exit
+
+=head1 ENVIRONMENT
+
+The configuration file should be placed in either /etc/screenfo.conf or 
+$XDG_CONFIG_HOME/screenfo/screenfo.conf
+
+=head1 AUTHOR
+
+Written by Magnus Woldrich
+
+=head1 REPORTING BUGS
+
+Report bugs to trapd00r\@trapd00r.se or use the issue tracker located at
+<http://github.com/trapd00r/screenfo/issues>
+
+screenfo homepage: <http://github.com/trapd00r/screenfo>
+
+=head1 COPYRIGHT
+
+Copyright (C) 2010 Magnus Woldrich
+
+License: GPLv2
+
+=head1 HISTORY
+
+Lets quote the Arch Linux user B<dtw> from a post on the BBS, late 2006:
+
+    OK, all the time in the screenshots thread we get "What gtk theme is that?",
+    "What is that in the corner?", blah blah blah.
+    Now, while we try to encourage people to post that with their screenie why
+    don't we make a simple script that grabs info from from the gtkrc's, .xinitrc,
+    etc, and outputs into a nice cowsay-like soundbite?
+
+Couple days later, user B<rab> made the first Perl version simply named
+'info.pl'. There were a lot of people in the community helping out,
+making it better, bigger, more complicated and virtually unmaintainable since
+absolutely no modularization or subroutines were used.
+
+People realized this and started to make their own versions in Bash and Python.
+
+My intent was to fork the original project, clean it up and make it 
+maintainable, but that was no fun. Therefore, B<screenfo> was born.
+
+=head1 THANKS
+
+I'd like to thank the Archlinux community for being awesome, B<kittykatt> for
+providing some ASCII art that I stole without asking, and B<slush-> for coming up
+with this awesome name.
+
+=head1 SEE ALSO
+
+The original post: <https://bbs.archlinux.org/viewtopic.php?id=24208&p=10>
+
+screenFetch: <http://github.com/KittyKatt/screenFetch>
+
+archey: <http://github.com/djmelik/archey>
 
 =cut
 # vim: set tw=0 nowrap: #FIXME
