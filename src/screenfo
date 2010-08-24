@@ -324,7 +324,7 @@ for(@$output) {
 
 =head1 NAME
 
-  screenfo - screenshot information tool
+  screenfo - screenshot information tool for nerds
 
 =head1 SYNOPSIS
 
@@ -352,6 +352,13 @@ while taking the screenshot.
 
 The configuration file should be placed in either /etc/screenfo.conf or 
 $XDG_CONFIG_HOME/screenfo/screenfo.conf
+
+=head1 REQUIREMENTS
+
+Perl => 5.10
+
+The String::Utils module, available in AUR and 
+<http://github.com/trapd00r/String-Utils>
 
 =head1 AUTHOR
 
