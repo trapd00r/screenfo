@@ -331,11 +331,11 @@ for(@$output) {
 Everybody like 'The monthly screenshot thread' where one is supposed to show
 off their latest setup.
 
-Nobody likes screenshots that look awesome, but where there's no information 
+Nobody likes screenshots that look awesome, but where there's no information
 at all available.
 
 B<screenfo> outputs a load of system information, including the running window
-manager, GTK theme, icons, fonts, shell, terminal emulator, and much more, 
+manager, GTK theme, icons, fonts, shell, terminal emulator, and much more,
 while taking the screenshot.
 
 =head1 OPTIONS
@@ -350,7 +350,7 @@ while taking the screenshot.
 
 =head1 ENVIRONMENT
 
-The configuration file should be placed in either /etc/screenfo.conf or 
+The configuration file should be placed in either /etc/screenfo.conf or
 $XDG_CONFIG_HOME/screenfo/screenfo.conf
 
 =head1 REQUIREMENTS
@@ -414,4 +414,3 @@ screenFetch: <http://github.com/KittyKatt/screenFetch>
 archey: <http://github.com/djmelik/archey>
 
 =cut
-# vim: set tw=0 nowrap: #FIXME
