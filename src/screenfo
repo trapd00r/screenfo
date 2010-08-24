@@ -139,7 +139,12 @@ sub get_uptime {
 
 sub get_no_users {
   chomp(my @users = split(/ /, `users`));
-  return(scalar(@users));
+  for(@users) {
+    if($_ =~ m/$ENV{USER}/) {
+      $_ = "\033[38;5;160m$_\033[0m";
+    }
+  }
+  return(sprintf("%d (%s)", scalar(@users), join(', ', @users)));
 }
 
 sub get_shell    { return($ENV{SHELL}); }
@@ -228,7 +233,7 @@ my $output = print_out($default_colorscheme, $default_logo);
 my $long = longest(@$output);
 
 @$output[0] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m", @$output[0], 'OS', ucfirst(get_os())
+  "%-${long}s %12s: \e[1m\e[38;5;253m%s\e[0m", @$output[0], 'OS', ucfirst(get_os())
 );
 @$output[1] = sprintf(
   "%-${long}s %12s: \e[1m%s\e[0m", @$output[1], 'Kernel', get_kernel()
