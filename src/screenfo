@@ -13,7 +13,6 @@ if($@) {
   warn($@);
 }
 
-
 # imported from configuration file
 our($now_playing, $default_colorscheme, %colorschemes, $default_logo,
     $color_support);
@@ -130,9 +129,17 @@ sub get_uptime {
   $mins  =~ s/^\s+//;
   $users =~ s/^\s+//;
 
+  if($days =~ /min/) { # no days
+    $mins = $days;
+    $days = -1;
+  }
   return($days)  if($wanted eq 'days');
   return($mins)  if($wanted eq 'mins');
-  return($users) if($wanted eq 'users');
+}
+
+sub get_no_users {
+  chomp(my @users = split(/ /, `users`));
+  return(scalar(@users));
 }
 
 sub get_shell    { return($ENV{SHELL}); }
@@ -202,7 +209,14 @@ sub colorme {
 
 sub get_wm { return('ratpoison'); }
 
-sub get_os { return($^O); }
+sub get_os {
+  if(-e '/etc/arch-release') {
+    return("GNU/Linux (Arch Linux)");
+  }
+  elsif($^O eq 'linux') {
+    return("GNU/Linux"); # be nice
+  }
+}
 
 sub available_colorschemes {
   print "$_\n" for(sort(keys(%colorschemes)));
@@ -217,10 +231,10 @@ my $long = longest(@$output);
   "%-${long}s %12s: \e[1m%s\e[0m", @$output[0], 'OS', ucfirst(get_os())
 );
 @$output[1] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m", @$output[1], 'WM', ucfirst(get_wm())
+  "%-${long}s %12s: \e[1m%s\e[0m", @$output[1], 'Kernel', get_kernel()
 );
 @$output[2] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m", @$output[2], 'Kernel', get_kernel()
+  "%-${long}s %12s: \e[1m%s\e[0m", @$output[2], 'WM', ucfirst(get_wm())
 );
 @$output[3] = sprintf(
   "%-${long}s %12s: \e[1m%s\e[0m", @$output[3], 'Theme',
@@ -234,10 +248,13 @@ my $long = longest(@$output);
   "%-${long}s %12s: \e[1m%s\e[0m", @$output[5], 'Font', 
   ucfirst(get_gtk_info('font'))
 );
+
+=who_cares
 @$output[6] = sprintf(
   "%-${long}s %12s: \e[1m%s\e[0m", @$output[6], 'Toolbar', 
   get_gtk_info('toolbar')
 );
+=cut
 
 @$output[7] = sprintf(
   "%-${long}s %12s: \e[1m\e[38;5;106m%s\e[0m/%s (\e[38;5;196m%s\e[0m)", 
@@ -254,14 +271,15 @@ my $long = longest(@$output);
   @$output[9], 'Memory', get_mem('used'), get_mem('total'),
 );
 
+#FIXME
 @$output[10] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m and %sutes", @$output[10], 'Uptime',
+  "%-${long}s %12s: \e[1m%s\e[0m and \e[1m%s\e[0m", @$output[10], 'Uptime',
   get_uptime('days'), get_uptime('mins'),
 );
 
 @$output[11] = sprintf(
   "%-${long}s %12s: \e[1m%s\e[0m %s", @$output[11], 'Users',
-  get_uptime('users'),
+  get_no_users()
 );
 
 @$output[12] = sprintf(
@@ -279,8 +297,14 @@ my $long = longest(@$output);
   get_cpu,
 );
 
+my $hostname = sprintf(
+  "%-${long}s \e[1m\e[38;5;208m%20s\e[0m", '', `hostname`
+);
+
+print $hostname;
 for(@$output) {
   # Ugliest hack ever... FIXME
+  # fsck, it works just fine. No one likes ws anyway
   if(/(.+)\s+([A-Za-z]+: .+)/) {
     print colorme($1), $2, "\n";
   }
