@@ -360,6 +360,8 @@ Perl => 5.10
 The String::Utils module, available in AUR and 
 <http://github.com/trapd00r/String-Utils>
 
+Some standard UNIX tools
+
 =head1 AUTHOR
 
 Written by Magnus Woldrich
