@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 our $APP     = 'screenfo';
-our $VERSION = 0.2;
+our $VERSION = 0.21;
 use strict;
 use Data::Dumper;
 use List::Util qw(shuffle);
@@ -22,19 +22,19 @@ if($@) {
 # imported from configuration file
 our($now_playing, $default_colorscheme, %colorschemes, $default_logo,
     $color_support);
-our($opt_random_colors) = undef;
-
+our($opt_random_colors, $opt_config) = undef;
 
 GetOptions(
   'ascii:s' => \$default_logo,
   'color:s' => \$default_colorscheme,
   'list'    => \&available_colorschemes,
   'norand'  => \$opt_random_colors,
+  'config'  => \$opt_config,
   'help'    => sub { pod2usage(verbose => 1) and exit(0); },
   'version' => sub { printf("%s %s\n", $APP, $VERSION); exit(0); },
 );
-$default_logo = "./ascii/$default_logo"; # FIXME
 
+$default_logo = "/usr/share/screenfo/ascii/$default_logo";
 
 sub get_kernel {
   open(my $fh, '<', '/proc/version') or warn($!);
@@ -226,7 +226,38 @@ sub colorme {
   return(@toreturn);
 }
 
-sub get_wm { return('ratpoison'); }
+sub get_wm {
+  my $active_wm = 'unknown';
+  my %wm_list = (
+    Ratpoison     => 'ratpoison',
+    StumpWM       => 'stumpwm',
+    dwm           => 'dwm',
+    wmii          => 'wmii',
+    i3            => 'i3',
+    Openbox       => 'openbox',
+    Fluxbox       => 'fluxbox',
+    Blackbox      => 'blackbox',
+    FVWM          => 'fvwm',
+    Enlightenment => 'enlightenment',
+    IceWM         => 'icewm',
+    PekWM         => 'pekwm',
+  );
+
+  open(my $ps, '-|', 'ps -A|awk {\'print $4\'}') or(warn($!)); # ugly
+  chomp(my @processes = <$ps>);
+  close($ps);
+
+  for my $friendly_wm(keys(%wm_list)) {
+    for my $process(@processes) {
+      if($process eq $wm_list{$friendly_wm}) {
+        print "Found WM: $process\n" if($DEBUG);
+        $active_wm = $process;
+        last;
+      }
+    }
+  }
+  return($active_wm);
+}
 
 sub get_os {
   if(-e '/etc/arch-release') {
@@ -234,6 +265,9 @@ sub get_os {
   }
   elsif($^O eq 'linux') {
     return("GNU/Linux"); # be nice
+  }
+  else {
+    return("Unknown");
   }
 }
 
