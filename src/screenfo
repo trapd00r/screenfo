@@ -22,7 +22,7 @@ if($@) {
 # imported from configuration file
 our($now_playing, $default_colorscheme, %colorschemes, $default_logo,
     $color_support);
-our($opt_random_colors) = undef;
+our($opt_random_colors, $opt_shot) = undef;
 
 get_color_support();
 
@@ -31,6 +31,7 @@ GetOptions(
   'color:s' => \$default_colorscheme,
   'list'    => \&available_colorschemes,
   'norand'  => \$opt_random_colors,
+  'shot'    => \$opt_shot,
   'help'    => sub { pod2usage(verbose => 1) and exit(0); },
   'version' => sub { printf("%s %s\n", $APP, $VERSION); exit(0); },
 );
@@ -379,6 +380,11 @@ for(@$output) {
     print colorme($_),"\n";
   }
 }
+if($opt_shot) {
+  #FIXME - scrot, import...
+  system('scrot') == 0 or(warn($!));
+  exit(0);
+}
 
 =pod
 
@@ -387,6 +393,10 @@ for(@$output) {
   screenfo - screenshot information tool for nerds
 
 =head1 SYNOPSIS
+
+  screenfo [OPTION]...
+
+=head1 DESCRIPTION
 
 Everybody likes 'The monthly screenshot thread' where one is supposed to show
 off their latest setup.
@@ -403,7 +413,8 @@ while taking the screenshot.
   -c,   --color     specify colorscheme to use
   -l,   --list      list available colorschemes
   -a,   --ascii     specify ascii art to use
-  -n,   --noran     turn off randomizing of colors
+  -n,   --noran     dont randomize the colors
+  -s    --shot      take screenshot
 
   -h,   --help      show help and exit
   -v,   --version   show version info and exit
@@ -417,10 +428,12 @@ $XDG_CONFIG_HOME/screenfo/screenfo.conf
 
 Perl => 5.10
 
-The String::Utils module, available in AUR and 
+The String::Utils module, available in AUR and
 <http://github.com/trapd00r/String-Utils>
 
 Some standard UNIX tools
+
+scrot for taking the actual screenshot
 
 =head1 AUTHOR
 
