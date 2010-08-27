@@ -22,19 +22,45 @@ if($@) {
 # imported from configuration file
 our($now_playing, $default_colorscheme, %colorschemes, $default_logo,
     $color_support);
-our($opt_random_colors, $opt_config) = undef;
+our($opt_random_colors) = undef;
+
+get_color_support();
 
 GetOptions(
   'ascii:s' => \$default_logo,
   'color:s' => \$default_colorscheme,
   'list'    => \&available_colorschemes,
   'norand'  => \$opt_random_colors,
-  'config'  => \$opt_config,
   'help'    => sub { pod2usage(verbose => 1) and exit(0); },
   'version' => sub { printf("%s %s\n", $APP, $VERSION); exit(0); },
 );
 
+# FIXME -e /usr/share/... || ./ascii/.. || croak()
 $default_logo = "/usr/share/screenfo/ascii/$default_logo";
+
+sub get_color_support {
+  chomp(my $colors = `tput colors`);
+  if($colors < 255) {
+    $color_support = 16; # dont bother with terms not supporting color
+    # mm, maintaince mayhem
+    %colorschemes = (
+    all        => [0..15],
+    ansi       => [0..15],            # obviously the same thing here
+    grey       => [0,8,7,15],         # black, bright black, white, bright white
+    red        => [1,9],              # red, bright red
+    green      => [2,10],             # green, bright green
+    white      => [7,15],             # white, bright white
+    blue       => [4,12],             # blue, bright blue
+    pink       => [5,13],             # magenta, bright magenta
+    yellow     => [3,11],             # yellow, bright yellow (' brown ')
+    fire       => [1,11,9,3],         # red, bright yellow, bright red, yellow
+    pinkgrey   => [0,13,7,15,5,8],    # black, bright magenta, white,
+                                      # bright white, magenta, bright black
+    orangegrey => [1,0,8,7,11,9,15,3],# red, black, bright black, white, bright
+                                      # yellow, bright red, bright white, yellow
+  );
+  }
+}
 
 sub get_kernel {
   open(my $fh, '<', '/proc/version') or warn($!);
@@ -362,7 +388,7 @@ for(@$output) {
 
 =head1 SYNOPSIS
 
-Everybody like 'The monthly screenshot thread' where one is supposed to show
+Everybody likes 'The monthly screenshot thread' where one is supposed to show
 off their latest setup.
 
 Nobody likes screenshots that look awesome, but where there's no information
