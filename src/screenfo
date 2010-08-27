@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 our $APP     = 'screenfo';
-our $VERSION = 0.21;
+our $VERSION = 0.22;
 use strict;
 use Data::Dumper;
 use List::Util qw(shuffle);
