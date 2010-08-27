@@ -2,7 +2,10 @@ NAME
       screenfo - screenshot information tool for nerds
 
 SYNOPSIS
-    Everybody like 'The monthly screenshot thread' where one is supposed to
+      screenfo [OPTION]...
+
+DESCRIPTION
+    Everybody likes 'The monthly screenshot thread' where one is supposed to
     show off their latest setup.
 
     Nobody likes screenshots that look awesome, but where there's no
@@ -16,7 +19,8 @@ OPTIONS
       -c,   --color     specify colorscheme to use
       -l,   --list      list available colorschemes
       -a,   --ascii     specify ascii art to use
-      -n,   --noran     turn off randomizing of colors
+      -n,   --noran     dont randomize the colors
+      -s    --shot      take screenshot
 
       -h,   --help      show help and exit
       -v,   --version   show version info and exit
@@ -32,6 +36,8 @@ REQUIREMENTS
     <http://github.com/trapd00r/String-Utils>
 
     Some standard UNIX tools
+
+    scrot for taking the actual screenshot
 
 AUTHOR
     Written by Magnus Woldrich
