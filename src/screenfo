@@ -334,9 +334,9 @@ my $long = longest(@$output);
   get_gtk_info('toolbar')
 );
 @$output[7] = sprintf(
-  "%-${long}s %12s: \e[1m\e[38;5;106m%s\e[0m/%s (\e[38;5;196m%s\e[0m)", 
+  "%-${long}s %12s: \e[1m\e[38;5;202m%s\e[0m/%s (\e[38;5;196m%s\e[0m)", 
   @$output[7], 'Disk',
-  get_disk_total('avail'), get_disk_total('size'), get_disk_total('percent'),
+  get_disk_total('used'), get_disk_total('size'), get_disk_total('percent'),
 );
 @$output[8] = sprintf(
   "%-${long}s %12s: \e[1m%s\e[0m", @$output[8], 'Processes', get_no_proc(),
