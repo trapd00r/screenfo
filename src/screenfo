@@ -66,7 +66,7 @@ sub get_color_support {
 sub get_kernel {
   open(my $fh, '<', '/proc/version') or warn($!);
   my $version = <$fh>;
-  my ($kernel) = $version =~ /(2\.[0-9]\.[0-9\w-]+)/;
+  my ($kernel) = $version =~ /(2\.[0-9]\.[0-9\S]+)/;
   return($kernel);
 }
 
@@ -162,6 +162,7 @@ sub get_uptime {
   $days  =~ s/^\s+//;
   $mins  =~ s/^\s+//;
   $users =~ s/^\s+//;
+  #FIXME better parsing, remove the 'days' and 'mins'
 
   if($days =~ /min/) { # no days
     $mins = $days;
