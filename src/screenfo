@@ -78,7 +78,7 @@ sub get_no_proc {
 
 sub get_gtk_info {
   my $wanted = shift // 'theme';
-  my ($gtk_theme, $gtk_font, $gtk_icons, $gtk_toolbar_style) = undef;
+  my ($gtk_theme, $gtk_font, $gtk_icons, $gtk_toolbar_style) = ('None found');
   if(-f "$ENV{HOME}/.gtkrc-2.0") {
     open(my $fh, '<', "$ENV{HOME}/.gtkrc-2.0") or warn($!);
     while(<$fh>) {
