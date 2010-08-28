@@ -261,7 +261,7 @@ sub colorme {
 }
 
 sub get_wm {
-  my $active_wm = 'unknown';
+  my $active_wm = 'Unknown';
   my %wm_list = (
     Ratpoison     => 'ratpoison',
     StumpWM       => 'stumpwm',
@@ -281,6 +281,7 @@ sub get_wm {
     Kwin          => 'kwin',
     Xfwm4         => 'xfwm4',
     Beryl         => 'beryl',
+    Compiz        => 'compiz',
 
   );
 
