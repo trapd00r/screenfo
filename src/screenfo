@@ -66,7 +66,7 @@ sub get_color_support {
 sub get_kernel {
   open(my $fh, '<', '/proc/version') or warn($!);
   my $version = <$fh>;
-  my ($kernel) = $version =~ /(2\.[0-9]\.[0-9]+)/;
+  my ($kernel) = $version =~ /(2\.[0-9]\.[0-9\w-]+)/;
   return($kernel);
 }
 
