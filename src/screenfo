@@ -276,6 +276,12 @@ sub get_wm {
     IceWM         => 'icewm',
     PekWM         => 'pekwm',
     Musca         => 'musca',
+    WindowMaker   => 'wmaker',
+    Metacity      => 'metacity',
+    Kwin          => 'kwin',
+    Xfwm4         => 'xfwm4',
+    Beryl         => 'beryl',
+
   );
 
   open(my $ps, '-|', 'ps -A|awk {\'print $4\'}') or(warn($!)); # ugly
