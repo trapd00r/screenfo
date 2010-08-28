@@ -29,7 +29,7 @@ get_color_support();
 GetOptions(
   'ascii:s' => \$default_logo,
   'color:s' => \$default_colorscheme,
-  'list'    => \&available_colorschemes,
+  'list'      => \&available_colorschemes,
   'norand'  => \$opt_random_colors,
   'shot'    => \$opt_shot,
   'help'    => sub { pod2usage(verbose => 1) and exit(0); },
@@ -165,7 +165,7 @@ sub get_uptime {
 
   if($days =~ /min/) { # no days
     $mins = $days;
-    $days = -1;
+    $days = 0;
   }
   return($days)  if($wanted eq 'days');
   return($mins)  if($wanted eq 'mins');
