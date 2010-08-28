@@ -78,23 +78,23 @@ sub get_no_proc {
 
 sub get_gtk_info {
   my $wanted = shift // 'theme';
-  my ($gtk_theme, $gtk_font, $gtk_icons, $gtk_toolbar_style) = ('None found');
+  my ($gtk_theme,$gtk_font,$gtk_icons,$gtk_toolbar_style) = ('None found') x 4;
   if(-f "$ENV{HOME}/.gtkrc-2.0") {
     open(my $fh, '<', "$ENV{HOME}/.gtkrc-2.0") or warn($!);
     while(<$fh>) {
-      if(/gtk-theme-name="(.+)"/) {
+      if(/gtk-theme-name\s*=\s*"(.+)"/) {
         $gtk_theme = $1;
         print "GTK Theme: $gtk_theme\n" if($DEBUG);
       }
-      if(/gtk-icon-theme-name="(.+)"/) {
+      if(/gtk-icon-theme-name\s*=\s*"(.+)"/) {
         $gtk_icons = $1;
         print "GTK Icons: $gtk_icons\n" if($DEBUG);
       }
-      if(/gtk-font-name="(.+)"/) {
+      if(/gtk-font-name\s*=\s*"(.+)"/) {
         $gtk_font = $1;
         print "GTK Font: $gtk_font\n" if($DEBUG);
       }
-      if(/gtk-toolbar-style=([0-9]+)/) {
+      if(/gtk-toolbar-style\s*=\s*([0-9]+)/) {
         $gtk_toolbar_style = $1;
         print "GTK Toolbar Style: $gtk_toolbar_style\n" if($DEBUG);
       }
