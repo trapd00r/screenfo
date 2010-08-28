@@ -156,9 +156,10 @@ sub to_mb {
 sub get_uptime {
   my $wanted = shift // 'days';
   chomp(my $uptime = `uptime`);
+  #my $uptime = ' 20:27:42 up 14:52,  2 users,  load average: 0.07, 0.11';
   $uptime =~ s/.+ up //;
 
-  my ($days,$mins,$users) = split(/,/, $uptime, 4);
+  my ($days,$mins) = split(/,/, $uptime, 3);
   if($days =~ /min/) { # no days
     $mins = $days;
     $days = 0;
@@ -168,9 +169,8 @@ sub get_uptime {
   $days  =~ s/^\s+//;
   $days =~ s/\s+\S+//; # remove 'days'
   $mins  =~ s/^\s+//;  # really HH::MM
-  $users =~ s/^\s+//;
 
-  if($days =~ /min/) { # no days
+  if($days =~ /:/) { # no days
     $mins = $days;
     $days = 0;
   }
