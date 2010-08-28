@@ -66,7 +66,7 @@ sub get_color_support {
 sub get_kernel {
   open(my $fh, '<', '/proc/version') or warn($!);
   my $version = <$fh>;
-  my ($kernel) = $version =~ /(2\.[0-9]\.[0-9\S]+)/;
+  my ($kernel) = $version =~ /(2\.[0-9]\.[0-9\S]+)/;  
   return($kernel);
 }
 
@@ -159,10 +159,16 @@ sub get_uptime {
   $uptime =~ s/.+ up //;
 
   my ($days,$mins,$users) = split(/,/, $uptime, 4);
+  if($days =~ /min/) { # no days
+    $mins = $days;
+    $days = 0;
+  }
+
+  #FIXME
   $days  =~ s/^\s+//;
-  $mins  =~ s/^\s+//;
+  $days =~ s/\s+\S+//; # remove 'days'
+  $mins  =~ s/^\s+//;  # really HH::MM
   $users =~ s/^\s+//;
-  #FIXME better parsing, remove the 'days' and 'mins'
 
   if($days =~ /min/) { # no days
     $mins = $days;
@@ -347,7 +353,7 @@ my $long = longest(@$output);
   @$output[9], 'Memory', get_mem('used'), get_mem('total'),
 );
 @$output[10] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m and \e[1m%s\e[0m", @$output[10], 'Uptime',
+  "%-${long}s %12s: \e[1m%s\e[0m days and \e[1m%s\e[0m", @$output[10], 'Uptime',
   get_uptime('days'), get_uptime('mins'),
 );
 @$output[11] = sprintf(
