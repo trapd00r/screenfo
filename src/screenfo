@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 our $APP     = 'screenfo';
-our $VERSION = 0.22;
+our $VERSION = 0.23;
 use strict;
 use Data::Dumper;
 use List::Util qw(shuffle);
@@ -29,7 +29,7 @@ get_color_support();
 GetOptions(
   'ascii:s' => \$default_logo,
   'color:s' => \$default_colorscheme,
-  'list'      => \&available_colorschemes,
+  'list'    => \&available_colorschemes,
   'norand'  => \$opt_random_colors,
   'shot'    => \$opt_shot,
   'help'    => sub { pod2usage(verbose => 1) and exit(0); },
