@@ -41,6 +41,9 @@ $default_logo = "/usr/share/screenfo/ascii/$default_logo";
 
 sub get_color_support {
   chomp(my $colors = `tput colors`);
+  if(!defined($colors)) {
+    $colors = 256;
+  }
   if($colors < 255) {
     $color_support = 16; # dont bother with terms not supporting color
     # mm, maintaince mayhem
@@ -77,7 +80,10 @@ sub get_no_proc {
 }
 
 sub get_gtk_info {
-  my $wanted = shift // 'theme';
+  my $wanted = shift;
+  if(!defined($wanted)) {
+    $wanted = 'theme';
+  }
   my ($gtk_theme,$gtk_font,$gtk_icons,$gtk_toolbar_style) = ('None found') x 4;
   if(-f "$ENV{HOME}/.gtkrc-2.0") {
     open(my $fh, '<', "$ENV{HOME}/.gtkrc-2.0") or warn($!);
@@ -108,7 +114,10 @@ sub get_gtk_info {
 }
 
 sub get_disk_total {
-  my $wanted = shift // 'size';
+  my $wanted = shift;
+  if(!defined($wanted)) {
+    $wanted = 'size';
+  }
   open(my $df, '-|', 'df -h --total') or warn($!);
   my($size,$used,$avail,$percent);
   while(<$df>) {
@@ -124,7 +133,10 @@ sub get_disk_total {
 }
 
 sub get_mem {
-  my $wanted = shift // 'free';
+  my $wanted = shift;
+  if(!defined($wanted)) {
+    $wanted = 'free';
+  }
   open(my $fh, '<', '/proc/meminfo') or warn($!);
   my ($total,$free,$buffers,$cached) = undef;
   while(<$fh>) {
@@ -154,7 +166,10 @@ sub to_mb {
 }
 
 sub get_uptime {
-  my $wanted = shift // 'days';
+  my $wanted = shift;
+  if(!defined($wanted)) {
+    $wanted = 'days';
+  }
   chomp(my $uptime = `uptime`);
   #my $uptime = ' 20:27:42 up 14:52,  2 users,  load average: 0.07, 0.11';
   $uptime =~ s/.+ up //;
@@ -199,7 +214,18 @@ sub get_terminal { return($ENV{TERM}); }
 
 sub get_cpu {
   chomp(my $cpu = `uname -p`);
-  return(-1) unless(defined($cpu));
+  if(!defined($cpu) or($cpu eq 'unknown')) { # ARMs seems to be 'unknown'
+    open(my $fh, '<', '/proc/cpuinfo') or die($!);
+    my @cpuinfo = <$fh>;
+    close($fh);
+
+    for(@cpuinfo) {
+      if(/^Processor\s+:\s+(.+)/) {
+        $cpu = $1;
+        last;
+      }
+    }
+  }
   return($cpu);
 }
 
@@ -282,9 +308,12 @@ sub get_wm {
     Xfwm4         => 'xfwm4',
     Beryl         => 'beryl',
     Compiz        => 'compiz',
+    Matchbox      => 'hildon-desktop',
 
   );
+  my %rev_wm = reverse(%wm_list);
 
+  # busybox ps will be $5
   open(my $ps, '-|', 'ps -A|awk {\'print $4\'}') or(warn($!)); # ugly
   chomp(my @processes = <$ps>);
   close($ps);
@@ -293,7 +322,7 @@ sub get_wm {
     for my $process(@processes) {
       if($process eq $wm_list{$friendly_wm}) {
         print "Found WM: $process\n" if($DEBUG);
-        $active_wm = $process;
+        $active_wm = $rev_wm{$process};
         last;
       }
     }
@@ -502,3 +531,4 @@ screenFetch: <http://github.com/KittyKatt/screenFetch>
 archey: <http://github.com/djmelik/archey>
 
 =cut
+
