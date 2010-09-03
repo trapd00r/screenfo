@@ -22,9 +22,7 @@ if($@) {
 # imported from configuration file
 our($now_playing, $default_colorscheme, %colorschemes, $default_logo,
     $color_support);
-our($opt_random_colors, $opt_shot) = undef;
-
-get_color_support();
+our($opt_random_colors, $opt_shot) = (undef,undef);
 
 GetOptions(
   'ascii:s' => \$default_logo,
@@ -33,6 +31,7 @@ GetOptions(
   'norand'  => \$opt_random_colors,
   'shot'    => \$opt_shot,
   'help'    => sub { pod2usage(verbose => 1) and exit(0); },
+  'man'     => sub { pod2usage(verbose => 3) and exit(0); },
   'version' => sub { printf("%s %s\n", $APP, $VERSION); exit(0); },
 );
 
@@ -46,6 +45,8 @@ else {
   print STDERR "No ascii art found or invalid art supplied in screenfo.conf\n";
   exit(-1);
 }
+
+get_color_support();
 
 sub get_color_support {
   my $colors = 16;
@@ -490,6 +491,7 @@ while taking the screenshot.
   -s    --shot      take screenshot
 
   -h,   --help      show help and exit
+  -m,   --man       show the manpage and exit
   -v,   --version   show version info and exit
 
 =head1 ENVIRONMENT
@@ -560,4 +562,3 @@ screenFetch: <http://github.com/KittyKatt/screenFetch>
 archey: <http://github.com/djmelik/archey>
 
 =cut
-
