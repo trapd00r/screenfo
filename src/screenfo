@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 our $APP     = 'screenfo';
-our $VERSION = 0.23;
+our $VERSION = 0.24;
 use strict;
 use Data::Dumper;
 use List::Util qw(shuffle);
@@ -36,16 +36,30 @@ GetOptions(
   'version' => sub { printf("%s %s\n", $APP, $VERSION); exit(0); },
 );
 
-# FIXME -e /usr/share/... || ./ascii/.. || croak()
-$default_logo = "/usr/share/screenfo/ascii/$default_logo";
+if(-e "/usr/share/screenfo/ascii/$default_logo") {
+  $default_logo = "/usr/share/screenfo/ascii/$default_logo";
+}
+elsif(-e "./ascii/$default_logo") {
+  $default_logo = "./ascii/$default_logo";
+}
+else {
+  print STDERR "No ascii art found or invalid art supplied in screenfo.conf\n";
+  exit(-1);
+}
 
 sub get_color_support {
-  chomp(my $colors = `tput colors`);
-  if(!defined($colors)) {
+  my $colors = 16;
+  if($ENV{TERM} eq 'xterm' or($ENV{TERM} eq 'rxvt-256-color')) {
     $colors = 256;
   }
-  if($colors < 255) {
-    $color_support = 16; # dont bother with terms not supporting color
+  elsif($ENV{TERM} eq 'rxvt-unicode') {
+    $colors = 88;
+  }
+  else {
+    chomp($colors = `tput colors`); # fail silently
+  }
+
+  if($colors < 88) { # man 7 urxvt
     # mm, maintaince mayhem
     %colorschemes = (
     all        => [0..15],
@@ -62,10 +76,25 @@ sub get_color_support {
                                       # bright white, magenta, bright black
     orangegrey => [1,0,8,7,11,9,15,3],# red, black, bright black, white, bright
                                       # yellow, bright red, bright white, yellow
-  );
+    );
+  }
+  elsif($colors == 88) {
+    %colorschemes = (
+      all       => [0..87],
+      ansi      => [0..15],
+      grey      => [0,8,7,15],
+      red       => [52,88],
+      green     => [22,28,34,40,46,70,76],
+      white     => [7,15],
+      blue      => [17..21,24..27,32,33,37..39],
+      pink      => [53..57,60..63],
+      yellow    => [3,11],
+      fire      => [3,11,88,52],
+      pinkgrey  => [8,0,53..57,60..63,15,7],
+      orangegrey => [1,0,8,7,11,9,15,3],
+    );
   }
 }
-
 sub get_kernel {
   open(my $fh, '<', '/proc/version') or warn($!);
   my $version = <$fh>;
