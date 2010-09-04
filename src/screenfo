@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 our $APP     = 'screenfo';
-our $VERSION = 0.24;
+our $VERSION = 0.25;
 use strict;
 use Data::Dumper;
 use List::Util qw(shuffle);
@@ -160,6 +160,31 @@ sub get_disk_total {
   while(<$df>) {
     if(/^total\s+([0-9.MGTP]+)\s+([0-9.MGTP]+)\s+([0-9.MGTP]+)\s+([0-9]+%)/) {
       ($size,$used,$avail,$percent) = ($1,$2,$3,$4);
+      $percent =~ s/\%//;
+
+      if($percent >= 90) {
+        $percent = "\e[38;5;88m\e[1m$percent\e[0m\e[1m%\e[0m";
+      }
+      else {
+        $percent = "\e[38;5;46m\e[1m$percent\e[0m\e[1m%\e[0m";
+      }
+
+      for(($size,$used,$avail)) {
+        #FIXME Make this a callable function
+        s/([A-Z])//;
+        my $notation = $1;
+        next if(!defined($notation));
+
+        if($notation eq 'M') {
+          $_ = "$_\e[48;5;45m$notation\e[0m";
+        }
+        elsif($notation eq 'G') {
+          $_ = "$_\e[48;5;35m$notation\e[0m";
+        }
+        elsif($notation eq 'T') {
+          $_ = "$_\e[38;5;71m$notation\e[0m";
+        }
+      }
     }
   }
   return($size)    if($wanted eq 'size');
@@ -234,10 +259,10 @@ sub get_no_users {
   chomp(my @users = split(/ /, `users`));
   for(@users) {
     if($_ =~ m/$ENV{USER}/) {
-      $_ = "\033[38;5;160m$_\033[0m";
+      $_ = "\033[38;5;35m$_\033[0m";
     }
   }
-  return(sprintf("%d (%s)", scalar(@users), join(', ', @users)));
+  return(sprintf("%d (\e[1m%s\e[0m)", scalar(@users), join(', ', @users)));
 }
 
 sub get_shell {
@@ -414,7 +439,7 @@ my $long = longest(@$output);
   get_gtk_info('toolbar')
 );
 @$output[7] = sprintf(
-  "%-${long}s %12s: \e[1m\e[38;5;202m%s\e[0m/%s (\e[38;5;196m%s\e[0m)", 
+  "%-${long}s %12s: \e[1m\e[38;5;34m%s\e[0m/\033[38;5;59m\e[1m%s\e[0m used (\e[38;5;196m%s\e[0m full)", 
   @$output[7], 'Disk',
   get_disk_total('used'), get_disk_total('size'), get_disk_total('percent'),
 );
@@ -422,7 +447,8 @@ my $long = longest(@$output);
   "%-${long}s %12s: \e[1m%s\e[0m", @$output[8], 'Processes', get_no_proc(),
 );
 @$output[9] = sprintf(
-  "%-${long}s %12s: \e[38;5;240m%s\e[0mM/\e[1m\e[38;5;240m%s\e[0mM used",
+  #FIXME use the to be created split size/notation function for colorizing
+  "%-${long}s %12s: \e[38;5;33m\e[1m%s\e[0m\e[1m\e[38;5;45mM\e[0m/\e[0m\e[1m\e[38;5;59m%s\e[38;5;45mM\e[0m used",
   @$output[9], 'Memory', get_mem('used'), get_mem('total'),
 );
 @$output[10] = sprintf(
@@ -430,7 +456,7 @@ my $long = longest(@$output);
   get_uptime('days'), get_uptime('mins'),
 );
 @$output[11] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m %s", @$output[11], 'Users',
+  "%-${long}s %12s: %s %s", @$output[11], 'Users',
   get_no_users()
 );
 @$output[12] = sprintf(
@@ -447,7 +473,7 @@ my $long = longest(@$output);
 );
 
 my $hostname = sprintf(
-  "%-${long}s \e[1m\e[38;5;208m%20s\e[0m", '', `hostname`
+  "%-${long}s \e[38;5;32m%20s\e[1m\e[38;5;35m@\e[0m\e[38;5;32m%s\e[0m", '',$ENV{USER}, `hostname`
 );
 
 print $hostname;
