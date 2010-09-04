@@ -176,10 +176,10 @@ sub get_disk_total {
         next if(!defined($notation));
 
         if($notation eq 'M') {
-          $_ = "$_\e[48;5;45m$notation\e[0m";
+          $_ = "$_\e[38;5;45m$notation\e[0m";
         }
         elsif($notation eq 'G') {
-          $_ = "$_\e[48;5;35m$notation\e[0m";
+          $_ = "$_\e[38;5;35m$notation\e[0m";
         }
         elsif($notation eq 'T') {
           $_ = "$_\e[38;5;71m$notation\e[0m";
