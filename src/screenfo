@@ -115,8 +115,16 @@ sub get_gtk_info {
     $wanted = 'theme';
   }
   my ($gtk_theme,$gtk_font,$gtk_icons,$gtk_toolbar_style) = ('None found') x 4;
-  if(-f "$ENV{HOME}/.gtkrc-2.0") {
-    open(my $fh, '<', "$ENV{HOME}/.gtkrc-2.0") or warn($!);
+
+  my $gtk_rc = "$ENV{HOME}/.gtkrc.mine";
+  if(-f $gtk_rc) {
+    # all good
+  }
+  elsif(-f "$ENV{HOME}/.gtkrc-2.0") {
+    $gtk_rc = "$ENV{HOME}/.gtkrc-2.0";
+  }
+
+    open(my $fh, '<', $gtk_rc) or warn($!);
     while(<$fh>) {
       if(/gtk-theme-name\s*=\s*"(.+)"/) {
         $gtk_theme = $1;
@@ -135,7 +143,6 @@ sub get_gtk_info {
         print "GTK Toolbar Style: $gtk_toolbar_style\n" if($DEBUG);
       }
     }
-  }
   return($gtk_theme)         if($wanted eq 'theme');
   return($gtk_icons)         if($wanted eq 'icons');
   return($gtk_font)          if($wanted eq 'font');
