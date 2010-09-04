@@ -50,17 +50,29 @@ get_color_support();
 
 sub get_color_support {
   my $colors = 16;
-  if($ENV{TERM} eq 'xterm' or($ENV{TERM} eq 'rxvt-256-color')) {
+  if(
+    $ENV{TERM} eq 'xterm'
+      or($ENV{TERM} eq 'rxvt-256-color')
+      or($ENV{TERM} =~ /screen-256/)
+      or($ENV{TERM} eq 'Eterm-256color')
+      or($ENV{TERM} eq 'gnome-256color')
+      or($ENV{TERM} eq 'konsole-256color')
+      or($ENV{TERM} eq 'putty-256color')
+      or($ENV{TERM} =~ /u?rxvt-256color/)
+  ) {
     $colors = 256;
   }
   elsif($ENV{TERM} eq 'rxvt-unicode') {
     $colors = 88;
   }
+  elsif($ENV{TERM} eq 'screen') {
+    $colors = 16;
+  }
   else {
     chomp($colors = `tput colors`); # fail silently
   }
 
-  if($colors < 88) { # man 7 urxvt
+  if(!defined($colors) or($colors < 88)) { # man 7 urxvt
     # mm, maintaince mayhem
     %colorschemes = (
     all        => [0..15],
@@ -124,7 +136,7 @@ sub get_gtk_info {
     $gtk_rc = "$ENV{HOME}/.gtkrc-2.0";
   }
 
-    open(my $fh, '<', $gtk_rc) or warn($!);
+    open(my $fh, '<', $gtk_rc); #fail silently
     while(<$fh>) {
       if(/gtk-theme-name\s*=\s*"(.+)"/) {
         $gtk_theme = $1;
