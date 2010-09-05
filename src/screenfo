@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 our $APP     = 'screenfo';
-our $VERSION = 0.25;
+our $VERSION = 0.26;
 use strict;
 use Data::Dumper;
 use List::Util qw(shuffle);
@@ -30,6 +30,7 @@ GetOptions(
   'list'    => \&available_colorschemes,
   'norand'  => \$opt_random_colors,
   'shot'    => \$opt_shot,
+  'debug'   => \$DEBUG,
   'help'    => sub { pod2usage(verbose => 1) and exit(0); },
   'man'     => sub { pod2usage(verbose => 3) and exit(0); },
   'version' => sub { printf("%s %s\n", $APP, $VERSION); exit(0); },
@@ -108,10 +109,84 @@ sub get_color_support {
     );
   }
 }
+
+if($DEBUG) {
+  chomp(my $host = `hostname`);
+  printf("\e[31;1m%13s \e[0mver \e[32;1m%s\e[0m\n", 'screenfo', $VERSION);
+  printf("%13s -=> \e[1m%s\e[0m\n", 'Perl', $^V);
+  printf("%13s -=> \e[1m%s\e[0m (from ENV)\n", 'User', $ENV{USER});
+  printf("%13s -=> \e[1m%s\e[0m (from hostname bin)\n",   'Host', $host);
+  printf("%13s -=> \e[1m%s\e[0m\n",'OS', get_os());
+  printf("%13s -=> \e[1m%s\e[0m\n",'WM', get_wm());
+  printf("%13s -=> \e[1m%s\e[0m (from /proc/version)\n",'Kernel', get_kernel());
+  printf("%13s -=> \e[1m%s\e[0m\n",'GTK Theme', get_gtk_info('theme'));
+  printf("%13s -=> \e[1m%s\e[0m\n",'GTK Icons', get_gtk_info('icons'));
+  printf("%13s -=> \e[1m%s\e[0m\n",'GTK Font', get_gtk_info('font'));
+  printf("%13s -=> \e[1m%s\e[0m\n",'GTK Toolbar', get_gtk_info('toolbar'));
+  printf("%13s -=> %s \e[1mused\e[0m out of %s (%s \e[1mfree\e[0m - that is %s)\n",
+    'Disk', get_disk_total('used'), get_disk_total('size'),
+    get_disk_total('avail'), get_disk_total('percent')
+  );
+  printf("%13s -=> %d\n", 'Processes', get_no_proc());
+  printf("%13s -=> %s \e[1mused\e[0m out of  %s (%s \e[1mfree\e[0m)\n", 'RAM',
+    get_mem('used'), get_mem('total'), get_mem('avail')
+  );
+  printf("%13s -=> %s \e[1mdays\e[0m, %s \e[1mmins\e[0m\n",
+    'Uptime', get_uptime('days'), get_uptime('mins')
+  );
+  printf("%13s -=> \e[1m%s\e[0m\n",'Users', get_no_users());
+  printf("%13s -=> \e[1m%s\e[0m (from ENV)\n",'Shell', get_shell());
+  printf("%13s -=> \e[1m%s\e[0m (from ENV)\n",'Terminal', get_terminal());
+  printf("%13s -=> \e[1m%s\e[0m (from uname or /proc/cpuinfo)\n",
+    'CPU', get_cpu()
+  );
+
+  if(-f '/etc/screenfo.conf') {
+    printf("%13s -=> \e[33m%s\e[0m (/etc/screenfo.conf)\n",
+      'Config', 'Found'
+    );
+  }
+  else {
+    printf("%13s -=> \e[31m%s\e[0m (/etc/screenfo.conf)\n",
+      'Config', 'NOT found'
+    );
+  }
+  printf("%13s -=> \e[1m%s\e[0m\n", 'Colorscheme', $default_colorscheme);
+
+  if(-f $default_logo) {
+    printf("%13s -=> \e[1m%s\e[0m (\e[33mfound\e[0m)\n",
+      'ASCII Art', $default_logo,
+    );
+  }
+  else {
+    printf("%13s -=> \e[1m%s\e[0m (\e[31;1mNOT found\e[0m)\n",
+      'ASCII Art', $default_logo,
+    );
+  }
+
+  if(ref($now_playing) eq 'CODE') {
+    printf("%13s -=> \e[1m%s\e[0m\n",
+      'Now Playing', "\e[33mValid\e[0m CODEREF",
+    );
+    printf("%s  -=> \e[1m%s\e[0m\n",
+      "\t\'-->", $now_playing->(),
+    );
+  }
+  else {
+    printf("%13s -=> \e[1m%s\e[0m\n",
+      'Now Playing', "\e[31;1mINVALID\e[0m CODEREF",
+    );
+  }
+
+  printf("%13s -=> \e[1m%s\e[0m (\e[1m%s\e[0m)\n",
+    'Color support', $color_support, $ENV{TERM},
+  );
+  exit(0);
+}
 sub get_kernel {
   open(my $fh, '<', '/proc/version') or warn($!);
   my $version = <$fh>;
-  my ($kernel) = $version =~ /(2\.[0-9]\.[0-9\S]+)/;  
+  my ($kernel) = $version =~ /(2\.[0-9]\.[0-9\S]+)/; # works until Linux 3
   return($kernel);
 }
 
@@ -126,7 +201,7 @@ sub get_gtk_info {
   if(!defined($wanted)) {
     $wanted = 'theme';
   }
-  my ($gtk_theme,$gtk_font,$gtk_icons,$gtk_toolbar_style) = ('None found') x 4;
+  my ($gtk_theme,$gtk_font,$gtk_icons,$gtk_toolbar) = ('None found') x 4;
 
   my $gtk_rc = "$ENV{HOME}/.gtkrc.mine";
   if(-f $gtk_rc) {
@@ -136,29 +211,25 @@ sub get_gtk_info {
     $gtk_rc = "$ENV{HOME}/.gtkrc-2.0";
   }
 
-    open(my $fh, '<', $gtk_rc); #fail silently
-    while(<$fh>) {
-      if(/gtk-theme-name\s*=\s*"(.+)"/) {
-        $gtk_theme = $1;
-        print "GTK Theme: $gtk_theme\n" if($DEBUG);
-      }
-      if(/gtk-icon-theme-name\s*=\s*"(.+)"/) {
-        $gtk_icons = $1;
-        print "GTK Icons: $gtk_icons\n" if($DEBUG);
-      }
-      if(/gtk-font-name\s*=\s*"(.+)"/) {
-        $gtk_font = $1;
-        print "GTK Font: $gtk_font\n" if($DEBUG);
-      }
-      if(/gtk-toolbar-style\s*=\s*([0-9]+)/) {
-        $gtk_toolbar_style = $1;
-        print "GTK Toolbar Style: $gtk_toolbar_style\n" if($DEBUG);
-      }
+  open(my $fh, '<', $gtk_rc); #fail silently
+  while(<$fh>) {
+    if(/gtk-theme-name\s*=\s*"(.+)"/) {
+      $gtk_theme = $1;
     }
+    if(/gtk-icon-theme-name\s*=\s*"(.+)"/) {
+      $gtk_icons = $1;
+    }
+    if(/gtk-font-name\s*=\s*"(.+)"/) {
+      $gtk_font = $1;
+    }
+    if(/gtk-toolbar-style\s*=\s*([0-9]+)/) {
+      $gtk_toolbar = $1;
+    }
+  }
   return($gtk_theme)         if($wanted eq 'theme');
   return($gtk_icons)         if($wanted eq 'icons');
   return($gtk_font)          if($wanted eq 'font');
-  return($gtk_toolbar_style) if($wanted eq 'toolbar');
+  return($gtk_toolbar) if($wanted eq 'toolbar');
   return(-1);
 }
 
@@ -395,7 +466,6 @@ sub get_wm {
   for my $friendly_wm(keys(%wm_list)) {
     for my $process(@processes) {
       if($process eq $wm_list{$friendly_wm}) {
-        print "Found WM: $process\n" if($DEBUG);
         $active_wm = $rev_wm{$process};
         last;
       }
