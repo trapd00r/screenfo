@@ -605,6 +605,7 @@ while taking the screenshot.
   -n,   --noran     dont randomize the colors
   -s    --shot      take screenshot
 
+  -d,   --debug     run some tests and exit
   -h,   --help      show help and exit
   -m,   --man       show the manpage and exit
   -v,   --version   show version info and exit
