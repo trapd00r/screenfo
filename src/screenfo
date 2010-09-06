@@ -454,6 +454,7 @@ sub get_wm {
     Beryl         => 'beryl',
     Compiz        => 'compiz',
     Matchbox      => 'hildon-desktop',
+    WMFS          => 'wmfs',
 
   );
   my %rev_wm = reverse(%wm_list);
