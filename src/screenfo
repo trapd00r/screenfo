@@ -455,6 +455,7 @@ sub get_wm {
     Compiz        => 'compiz',
     Matchbox      => 'hildon-desktop',
     WMFS          => 'wmfs',
+    Xmonad        => 'xmonad.*',
 
   );
   my %rev_wm = reverse(%wm_list);
@@ -466,7 +467,9 @@ sub get_wm {
 
   for my $friendly_wm(keys(%wm_list)) {
     for my $process(@processes) {
-      if($process eq $wm_list{$friendly_wm}) {
+      # used eq before I found out xmonad uses different process names
+      # for diff arch's
+      if($process =~ m;$wm_list{$friendly_wm};) {
         $active_wm = $rev_wm{$process};
         last;
       }
