@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+# testing n900
 our $APP     = 'screenfo';
 our $VERSION = 0.26;
 use strict;
@@ -183,6 +184,7 @@ if($DEBUG) {
   );
   exit(0);
 }
+
 sub get_kernel {
   open(my $fh, '<', '/proc/version') or warn($!);
   my $version = <$fh>;
