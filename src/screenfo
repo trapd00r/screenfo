@@ -10,12 +10,16 @@ use Pod::Usage;
 
 my $DEBUG = 0;
 
-eval { require("$ENV{XDG_CONFIG_HOME}/screenfo/screenfo.conf"); };
-if($@) {
-  eval { require('/etc/screenfo.conf'); };
+require('./screenfo.conf') if($DEBUG);
+
+unless($DEBUG) {
+  eval { require("$ENV{XDG_CONFIG_HOME}/screenfo/screenfo.conf"); };
   if($@) {
-    print STDERR "No configuration file found\n";
-    exit(-1);
+    eval { require('/etc/screenfo.conf'); };
+    if($@) {
+      print STDERR "No configuration file found\n";
+      exit(-1);
+    }
   }
 }
 
@@ -422,7 +426,7 @@ sub colorme {
       $i = 0;
     }
     if($_ eq '') {
-      push(@toreturn, $_);
+      push(@toreturn, "$_");
     }
     else {
       push(@toreturn, "\e[38;5;@$colorizer[$i]" . 'm' . $_ . "\e[0m");
@@ -557,6 +561,9 @@ my $long = longest(@$output);
 @$output[14] = sprintf(
   "%-${long}s %12s: \e[1m%s\e[0m %s", @$output[14], 'CPU',
   get_cpu,
+);
+@$output[15] = sprintf(
+  "%-${long}s %12s: \e[1m%s\e[0m %s", @$output[15],'Music', $now_playing->(),
 );
 
 my $hostname = sprintf(
