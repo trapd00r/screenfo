@@ -1,5 +1,4 @@
 #!/usr/bin/perl
-# testing n900
 our $APP     = 'screenfo';
 our $VERSION = 0.26;
 use strict;
