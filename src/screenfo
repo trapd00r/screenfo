@@ -26,13 +26,14 @@ unless($DEBUG) {
 # imported from configuration file
 our($now_playing, $default_colorscheme, %colorschemes, $default_logo,
     $color_support);
-our($opt_random_colors, $opt_shot) = (undef,undef);
+our($opt_shot) = undef;
+our($randomize_colors); # 0 disables the randomizing (default)
 
 GetOptions(
   'ascii:s' => \$default_logo,
   'color:s' => \$default_colorscheme,
   'list'    => \&available_colorschemes,
-  'norand'  => \$opt_random_colors,
+  'random'  => \$randomize_colors,
   'shot'    => \$opt_shot,
   'debug'   => \$DEBUG,
   'help'    => sub { pod2usage(verbose => 1) and exit(0); },
@@ -394,7 +395,7 @@ sub print_out {
     $color = $colorschemes{ansi};
   }
 
-  @$color = shuffle(@$color) if($opt_random_colors);
+  @$color = shuffle(@$color) if($randomize_colors);
 
   #FIXME
   my $f = join('', @logo);
@@ -418,7 +419,7 @@ sub colorme {
     $colorizer = $colorschemes{ansi};
   }
 
-  @$colorizer = shuffle(@$colorizer) unless($opt_random_colors);
+  @$colorizer = shuffle(@$colorizer) if($randomize_colors);
 
   my $i = 0;
   for(@data) {
@@ -614,7 +615,7 @@ while taking the screenshot.
   -c,   --color     specify colorscheme to use
   -l,   --list      list available colorschemes
   -a,   --ascii     specify ascii art to use
-  -n,   --noran     dont randomize the colors
+  -r,   --random    randomize the colors
   -s    --shot      take screenshot
 
   -d,   --debug     run some tests and exit
