@@ -584,7 +584,12 @@ for(@$output) {
 }
 if($opt_shot) {
   #FIXME - scrot, import...
-  system('scrot') == 0 or(warn($!));
+  my($s, $m, $h, $d, $month, $y) = localtime(time());
+  $y += 1900;
+  $month = sprintf("%02d", $month+1);
+  $m     = sprintf("%02d", $m);
+  $s     = sprintf("%02d", $s);
+  system('scrot', "$y-$month-$d-$h$m$s-screenfo.png") == 0 or(warn($!));
   exit(0);
 }
 
