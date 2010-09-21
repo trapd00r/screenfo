@@ -173,8 +173,8 @@ if($DEBUG) {
     printf("%13s -=> \e[1m%s\e[0m\n",
       'Now Playing', "\e[33mValid\e[0m CODEREF",
     );
-    printf("%s  -=> \e[1m%s\e[0m\n",
-      "\t\'-->", $now_playing->(),
+    printf("%s  \e[1m%s\e[0m\n",
+      "\t\t  \t'-->", $now_playing->(),
     );
   }
   else {
@@ -462,7 +462,9 @@ sub get_wm {
     Matchbox      => 'hildon-desktop',
     WMFS          => 'wmfs',
     Xmonad        => 'xmonad.*',
-
+    Xfce          => 'xfce4-session',
+    KDE           => 'ksmserver',
+    GNOME         => 'gnome-session',
   );
   my %rev_wm = reverse(%wm_list);
 
@@ -523,15 +525,15 @@ my $long = longest(@$output);
   ucfirst(get_gtk_info('icons'))
 );
 @$output[5] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m", @$output[5], 'Font', 
+  "%-${long}s %12s: \e[1m%s\e[0m", @$output[5], 'Font',
   ucfirst(get_gtk_info('font'))
 );
 @$output[6] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m", @$output[6], 'Toolbar', 
+  "%-${long}s %12s: \e[1m%s\e[0m", @$output[6], 'Toolbar',
   get_gtk_info('toolbar')
 );
 @$output[7] = sprintf(
-  "%-${long}s %12s: \e[1m\e[38;5;34m%s\e[0m/\033[38;5;59m\e[1m%s\e[0m used (\e[38;5;196m%s\e[0m full)", 
+  "%-${long}s %12s: \e[1m\e[38;5;34m%s\e[0m/\033[38;5;59m\e[1m%s\e[0m used (\e[38;5;196m%s\e[0m full)",
   @$output[7], 'Disk',
   get_disk_total('used'), get_disk_total('size'), get_disk_total('percent'),
 );
@@ -678,7 +680,7 @@ absolutely no modularization or subroutines were used.
 
 People realized this and started to make their own versions in Bash and Python.
 
-My intent was to fork the original project, clean it up and make it 
+My intent was to fork the original project, clean it up and make it
 maintainable, but that was no fun. Therefore, B<screenfo> was born.
 
 =head1 THANKS
