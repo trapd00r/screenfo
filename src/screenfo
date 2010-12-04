@@ -1,12 +1,13 @@
 #!/usr/bin/perl
 our $APP     = 'screenfo';
-our $VERSION = 0.26;
+our $VERSION = 0.28;
 use strict;
 use Data::Dumper;
 use List::Util qw(shuffle);
 use String::Utils qw(longest);
 use Getopt::Long;
 use Pod::Usage;
+use Term::ExtendedColor;
 
 my $DEBUG = 0;
 
@@ -345,13 +346,10 @@ sub get_uptime {
 }
 
 sub get_no_users {
-  chomp(my @users = split(/ /, `users`));
-  for(@users) {
-    if($_ =~ m/$ENV{USER}/) {
-      $_ = "\033[38;5;35m$_\033[0m";
-    }
-  }
-  return(sprintf("%d (\e[1m%s\e[0m)", scalar(@users), join(', ', @users)));
+  my %users;
+  map { $users{$_} = 1 } split(/ /, `users`);
+
+  return scalar(keys(%users));
 }
 
 sub get_shell {
@@ -465,6 +463,15 @@ sub get_wm {
     Xfce          => 'xfce4-session',
     KDE           => 'ksmserver',
     GNOME         => 'gnome-session',
+
+    # NOTE Not sure of their processes
+    EvilWM        => 'evil-wm',
+    ScrotWM       => 'scrot-wm',
+    Tritium       => 'tritium',
+    Euclid        => 'euclid',
+    Echinus       => 'echinus',
+    JWM           => 'jwm',
+    TWM           => 'twm',
   );
   my %rev_wm = reverse(%wm_list);
 
