@@ -486,7 +486,7 @@ sub get_wm {
   my %rev_wm = reverse(%wm_list);
 
   # busybox ps will be $5
-  open(my $ps, '-|', 'ps -A|awk {\'print $4\'}') or(warn($!)); # ugly
+  open(my $ps, '-|', 'ps -A|awk \'{print $4}\'') or(warn($!)); # ugly
   chomp(my @processes = <$ps>);
   close($ps);
 
