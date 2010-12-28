@@ -81,7 +81,6 @@ sub config_init {
   require($config);
   warn $@ if $@;
 }
-
 sub longest {
   return unless(my @strings = @_);
   chomp(@strings);
@@ -763,8 +762,11 @@ $XDG_CONFIG_HOME/screenfo/screenfo.conf
 
 Perl => 5.10
 
-The String::Utils module, available in AUR and
-<http://github.com/trapd00r/String-Utils>
+Term::ExtendedColor, available from CPAN:
+
+  cpan Term::ExtendedColor
+
+or github: L<http://github.com/trapd00r/Term-ExtendedColor>
 
 Some standard UNIX tools
 
