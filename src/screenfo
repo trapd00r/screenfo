@@ -495,7 +495,7 @@ sub get_wm {
       # used eq before I found out xmonad uses different process names
       # for diff arch's
       if($process =~ m;$wm_list{$friendly_wm};) {
-        $active_wm = $rev_wm{$process};
+        $active_wm = $friendly_wm;
         last;
       }
     }
