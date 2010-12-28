@@ -8,7 +8,6 @@ use List::Util qw(shuffle);
 use Getopt::Long;
 use Pod::Usage;
 
-use String::Utils qw(longest);
 use Term::ExtendedColor;
 
 my $DEBUG = $ENV{DEBUG};
@@ -82,6 +81,20 @@ sub config_init {
   require($config);
   warn $@ if $@;
 }
+
+sub longest {
+  return unless(my @strings = @_);
+  chomp(@strings);
+
+  my %len_map = ();
+
+  map{ $len_map{length($_)} = $_ } @strings;
+
+  for my $k(sort{$b <=> $a} keys(%len_map)) {
+    return $k;
+  }
+}
+
 
 
 sub get_color_support {
