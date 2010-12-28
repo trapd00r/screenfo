@@ -1,28 +1,17 @@
 #!/usr/bin/perl
-our $APP     = 'screenfo';
-our $VERSION = 0.29;
+my $APP = 'screenfo';
+use vars qw($VERSION);
+$VERSION = '0.295';
+
 use strict;
-use Data::Dumper;
 use List::Util qw(shuffle);
-use String::Utils qw(longest);
 use Getopt::Long;
 use Pod::Usage;
+
+use String::Utils qw(longest);
 use Term::ExtendedColor;
 
-my $DEBUG = 0;
-
-require('./screenfo.conf') if($DEBUG);
-
-unless($DEBUG) {
-  eval { require("$ENV{XDG_CONFIG_HOME}/screenfo/screenfo.conf"); };
-  if($@) {
-    eval { require('/etc/screenfo.conf'); };
-    if($@) {
-      print STDERR "No configuration file found\n";
-      exit(-1);
-    }
-  }
-}
+my $DEBUG = $ENV{DEBUG};
 
 # imported from configuration file
 our($now_playing, $default_colorscheme, %colorschemes, $default_logo,
@@ -30,30 +19,70 @@ our($now_playing, $default_colorscheme, %colorschemes, $default_logo,
 our($opt_shot) = undef;
 our($randomize_colors); # 0 disables the randomizing (default)
 
+config_init();
+
 GetOptions(
-  'ascii:s' => \$default_logo,
-  'color:s' => \$default_colorscheme,
-  'list'    => \&available_colorschemes,
-  'random'  => \$randomize_colors,
-  'shot'    => \$opt_shot,
-  'debug'   => \$DEBUG,
-  'help'    => sub { pod2usage(verbose => 1) and exit(0); },
-  'man'     => sub { pod2usage(verbose => 3) and exit(0); },
-  'version' => sub { printf("%s %s\n", $APP, $VERSION); exit(0); },
+  'a|ascii:s' => \$default_logo,
+  'c|color:s' => \$default_colorscheme,
+  'l|list'    => \&available_colorschemes,
+  'r|random'  => \$randomize_colors,
+  's|shot'    => \$opt_shot,
+  'd|debug'   => \$DEBUG,
+  'h|help'    => sub { pod2usage(verbose => 1) and exit(0); },
+  'm|man'     => sub { pod2usage(verbose => 3) and exit(0); },
+  'v|version' => sub { printf("%s v%s\n", $APP, $VERSION); exit(0); },
 );
 
-if(-e "/usr/share/screenfo/ascii/$default_logo") {
-  $default_logo = "/usr/share/screenfo/ascii/$default_logo";
-}
-elsif(-e "./ascii/$default_logo") {
-  $default_logo = "./ascii/$default_logo";
-}
-else {
-  print STDERR "No ascii art found or invalid art supplied in screenfo.conf\n";
-  exit(-1);
+logo_init($default_logo);
+
+if(not defined($default_logo)) {
+  $default_logo = logo_init('arch');
 }
 
 get_color_support();
+
+sub logo_init {
+  my $logo = shift;
+
+  if(-f "/usr/share/screenfo/ascii/$logo") {
+    $default_logo = "/usr/share/screenfo/ascii/$logo";
+  }
+  elsif(-f "./ascii/$logo") {
+    $default_logo = "./ascii/$logo";
+  }
+  else {
+    $default_logo = undef;
+  }
+}
+
+sub config_init {
+  my $config;
+  if(-f "$ENV{HOME}/.config/screenfo/screenfo.conf") {
+    $config = "$ENV{HOME}/.config/screenfo/screenfo.conf";
+  }
+  elsif(-f "$ENV{HOME}/.screenfo.conf") {
+    $config = "$ENV{HOME}/.screenfo.conf";
+  }
+  elsif(-f "$ENV{HOME}/screenfo.conf") {
+    $config = "$ENV{HOME}/screenfo.conf";
+  }
+  elsif(-f './screenfo.conf') {
+    $config = './screenfo.conf';
+  }
+  elsif(-f '/etc/screenfo.conf') {
+    $config = '/etc/screenfo.conf';
+  }
+  else {
+    warn "No configuration file found.\n";
+    warn "See docs/screenfo.conf.example for an example configuration file.\n";
+    exit 1;
+  }
+  print "Config found: $config\n" if $DEBUG;
+
+  require($config);
+  warn $@ if $@;
+}
+
 
 sub get_color_support {
   my $colors = 16;
@@ -208,7 +237,8 @@ sub get_gtk_info {
   if(!defined($wanted)) {
     $wanted = 'theme';
   }
-  my ($gtk_theme,$gtk_font,$gtk_icons,$gtk_toolbar) = ('None found') x 4;
+  my ($gtk_theme,$gtk_font,$gtk_icons,$gtk_toolbar) =
+    (fg(242,'Unknown')) x 4;
 
   my $gtk_rc = "$ENV{HOME}/.gtkrc.mine";
   if(-f $gtk_rc) {
@@ -253,10 +283,10 @@ sub get_disk_total {
       $percent =~ s/\%//;
 
       if($percent >= 90) {
-        $percent = "\e[38;5;88m\e[1m$percent\e[0m\e[1m%\e[0m";
+        $percent = sprintf("%s%%", fg(188, $percent));
       }
       else {
-        $percent = "\e[38;5;46m\e[1m$percent\e[0m\e[1m%\e[0m";
+        $percent = sprintf("%s%%", fg(172, fg('bold', $percent)));
       }
 
       for(($size,$used,$avail)) {
@@ -266,13 +296,13 @@ sub get_disk_total {
         next if(!defined($notation));
 
         if($notation eq 'M') {
-          $_ = "$_\e[38;5;45m$notation\e[0m";
+          $_ = sprintf("%s%s", $_, fg(45, $notation));
         }
         elsif($notation eq 'G') {
-          $_ = "$_\e[38;5;35m$notation\e[0m";
+          $_ = sprintf("%s%s", $_, fg(35, $notation));
         }
         elsif($notation eq 'T') {
-          $_ = "$_\e[38;5;71m$notation\e[0m";
+          $_ = sprintf("%s%s", $_, fg(71, $notation));
         }
       }
     }
@@ -337,11 +367,21 @@ sub get_uptime {
   $days =~ s/\s+\S+//; # remove 'days'
   $mins  =~ s/^\s+//;  # really HH::MM
 
+
   if($days =~ /:/) { # no days
     $mins = $days;
     $days = 0;
   }
+
+  my ($hours) = $mins =~ m/(\d+):/;
+
+  # NOTE needs more testing
+  if(defined($hours)) {
+    $mins =~ s/$hours://; # ugly
+  }
+
   return($days)  if($wanted eq 'days');
+  return($hours) if($wanted eq 'hours');
   return($mins)  if($wanted eq 'mins');
 }
 
@@ -356,7 +396,7 @@ sub get_no_users {
         ($who eq $ENV{USER})
           ? fg('orange2', fg('bold', $who))
           : $who
-          , $users{$who},
+          , fg('blue4', $users{$who}),
         ));
   }
   return join(', ', @output);
@@ -392,7 +432,7 @@ sub print_out {
   my $color = $default_colorscheme;
   my $logo = $default_logo;
 
-  open(my $fh, '<', $logo) or die($!);
+  open(my $fh, '<', $logo) or return(["No logo found, tried '$logo': $!"]);
   my @logo = <$fh>;
   close($fh);
 
@@ -521,76 +561,105 @@ sub available_colorschemes {
 }
 
 my $output = print_out($default_colorscheme, $default_logo);
-
 my $long = longest(@$output);
 
+
 @$output[0] = sprintf(
-  "%-${long}s %12s: \e[1m\e[38;5;253m%s\e[0m", @$output[0], 'OS', ucfirst(get_os())
+  "%-${long}s %12s: %s", @$output[0], 'OS',
+  ucfirst(get_os()),
 );
+
 @$output[1] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m", @$output[1], 'Kernel', get_kernel()
+  "%-${long}s %12s: %s", @$output[1], 'Kernel',
+  get_kernel(),
 );
+
 @$output[2] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m", @$output[2], 'WM', ucfirst(get_wm())
+  "%-${long}s %12s: %s", @$output[2], 'WM',
+  ucfirst(get_wm()),
 );
+
 @$output[3] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m", @$output[3], 'Theme',
-  ucfirst(get_gtk_info())
+  "%-${long}s %12s: %s", @$output[3], 'Theme',
+  ucfirst(get_gtk_info()),
 );
+
 @$output[4] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m", @$output[4], 'Icons',
-  ucfirst(get_gtk_info('icons'))
+  "%-${long}s %12s: %s", @$output[4], 'Icons',
+  ucfirst(get_gtk_info('icons')),
 );
+
 @$output[5] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m", @$output[5], 'Font',
-  ucfirst(get_gtk_info('font'))
+  "%-${long}s %12s: %s", @$output[5], 'Font',
+  ucfirst(get_gtk_info('font')),
 );
+
 @$output[6] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m", @$output[6], 'Toolbar',
-  get_gtk_info('toolbar')
+  "%-${long}s %12s: %s", @$output[6], 'Toolbar',
+  get_gtk_info('toolbar'),
 );
+
+
+my $used   = get_disk_total('used');
+my $total  = get_disk_total('size');
+my $percent_full = get_disk_total('percent');
+$percent_full =~ s/\%//g;
+$percent_full = color_by_value($percent_full);
+
 @$output[7] = sprintf(
-  "%-${long}s %12s: \e[1m\e[38;5;34m%s\e[0m/\033[38;5;59m\e[1m%s\e[0m used (\e[38;5;196m%s\e[0m full)",
-  @$output[7], 'Disk',
-  get_disk_total('used'), get_disk_total('size'), get_disk_total('percent'),
+  "%-${long}s %12s: %s/%s used (%s%%)", @$output[7], 'Disk',
+  $used,
+  $total,
+  $percent_full,
 );
+
 @$output[8] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m", @$output[8], 'Processes', get_no_proc(),
+  "%-${long}s %12s: %s", @$output[8], 'Processes',
+  get_no_proc(),
 );
+
 @$output[9] = sprintf(
-  #FIXME use the to be created split size/notation function for colorizing
-  "%-${long}s %12s: \e[38;5;33m\e[1m%s\e[0m\e[1m\e[38;5;45mM\e[0m/\e[0m\e[1m\e[38;5;59m%s\e[38;5;45mM\e[0m used",
-  @$output[9], 'Memory', get_mem('used'), get_mem('total'),
+  "%-${long}s %12s: %sM/%sM used", @$output[9], 'Memory',
+  fg(220, fg('bold', get_mem('used'))),
+  fg(244, fg('bold', get_mem('total'))),
 );
+
 @$output[10] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m days and \e[1m%s\e[0m", @$output[10], 'Uptime',
-  get_uptime('days'), get_uptime('mins'),
+  "%-${long}s %12s: %s days, %s hours and %s minutes", @$output[10], 'Uptime',
+  fg(196, fg('bold', get_uptime('days'))),
+  fg(178, get_uptime('hours')),
+  fg(100, get_uptime('mins')),
 );
+
 @$output[11] = sprintf(
   "%-${long}s %12s: %s %s", @$output[11], 'Users',
   get_no_users()
 );
 @$output[12] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m %s", @$output[12], 'Shell',
+  "%-${long}s %12s: %s %s", @$output[12], 'Shell',
   get_shell(),
 );
 @$output[13] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m %s", @$output[13], 'Terminal',
+  "%-${long}s %12s: %s %s", @$output[13], 'Terminal',
   get_terminal(),
 );
 @$output[14] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m %s", @$output[14], 'CPU',
+  "%-${long}s %12s: %s %s", @$output[14], 'CPU',
   get_cpu,
 );
 @$output[15] = sprintf(
-  "%-${long}s %12s: \e[1m%s\e[0m %s", @$output[15],'Music', $now_playing->(),
+  "%-${long}s %12s: %s %s", @$output[15],'Music',
+  $now_playing->(),
 );
 
 my $hostname = sprintf(
-  "%-${long}s \e[38;5;32m%20s\e[1m\e[38;5;35m@\e[0m\e[38;5;32m%s\e[0m", '',$ENV{USER}, `hostname`
+  "%-${long}s %32s@{[fg('bold', '@')]}%s",'',
+  fg(178, $ENV{USER}),
+  fg(240, fg('bold', `hostname`)),
 );
 
 print $hostname;
+
 for(@$output) {
   # Ugliest hack ever... FIXME
   # fsck, it works just fine. No one likes ws anyway
@@ -611,6 +680,31 @@ if($opt_shot) {
   system('scrot', "$y-$month-$d-$h$m$s-screenfo.png") == 0 or(warn($!));
   exit(0);
 }
+
+sub color_by_value {
+  my $value = shift;
+
+  return fg('green15',  $value) if $value <= 10;
+  return fg('green17',  $value) if $value <= 15;
+  return fg('green19',  $value) if $value <= 20;
+  return fg('green21',  $value) if $value <= 25;
+  return fg('green23',  $value) if $value <= 30;
+
+  return fg('yellow8',  $value) if $value <= 35;
+  return fg('yellow9',  $value) if $value <= 40;
+  return fg('yellow10', $value) if $value <= 45;
+  return fg('yellow13', $value) if $value <= 50;
+  return fg('yellow15', $value) if $value <= 55;
+  return fg('yellow17', $value) if $value <= 60;
+
+  return fg('red5', $value) if $value <= 60;
+  return fg('red4', $value) if $value <= 65;
+  return fg('red3', $value) if $value <= 70;
+  return fg('red2', $value) if $value <= 85;
+  return fg('red1', $value) if $value <= 80;
+}
+
+
 
 =pod
 
