@@ -26,14 +26,33 @@ OPTIONS
       -v,   --version   show version info and exit
 
 ENVIRONMENT
-    The configuration file should be placed in either /etc/screenfo.conf or
+
+    The configuration file is searched for in the following places:
+
     $XDG_CONFIG_HOME/screenfo/screenfo.conf
+    $HOME/.config/screenfo/screenfo.conf
+    $HOME/.screenfo.conf
+    $HOME/screenfo.conf
+    ./screenfo.conf
+    /etc/screenfo.conf
+
+    The files in the ascii/ directory is searched for in in the following
+    places:
+
+    $XDG_DATA_HOME/screenfo/ascii
+    $HOME/.local/share/screenfo/ascii
+    $HOME/.screenfo/ascii
+    ./ascii
+    /usr/share/screenfo/ascii
 
 REQUIREMENTS
     Perl => 5.10
 
-    The String::Utils module, available in AUR and
-    <http://github.com/trapd00r/String-Utils>
+    Term::ExtendedColor, available from the CPAN:
+
+      cpan Term::ExtendedColor
+
+    and github: http://github.com/trapd00r/Term-ExtendedColor
 
     Some standard UNIX tools
 

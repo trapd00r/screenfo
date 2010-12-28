@@ -43,11 +43,20 @@ get_color_support();
 sub logo_init {
   my $logo = shift;
 
-  if(-f "/usr/share/screenfo/ascii/$logo") {
-    $default_logo = "/usr/share/screenfo/ascii/$logo";
+  if(-f "$ENV{XDG_DATA_HOME}/screenfo/ascii/$logo") {
+    $default_logo = "$ENV{XDG_DATA_HOME}/screenfo/ascii/$logo";
+  }
+  elsif(-f "$ENV{HOME}/.local/share/screenfo/ascii/$logo") {
+    $default_logo = "$ENV{HOME}/.local/share/screenfo/ascii/$logo";
+  }
+  elsif(-f "$ENV{HOME}/.screenfo/ascii/$logo") {
+    $default_logo = "$ENV{HOME}/.screenfo/ascii/$logo";
   }
   elsif(-f "./ascii/$logo") {
     $default_logo = "./ascii/$logo";
+  }
+  elsif(-f "/usr/share/screenfo/ascii/$logo") {
+    $default_logo = "/usr/share/screenfo/ascii/$logo";
   }
   else {
     $default_logo = undef;
@@ -56,7 +65,10 @@ sub logo_init {
 
 sub config_init {
   my $config;
-  if(-f "$ENV{HOME}/.config/screenfo/screenfo.conf") {
+  if(-f "$ENV{XDG_CONFIG_HOME}/.config/screenfo/screenfo.conf") {
+    $config = "$ENV{HOME}/.config/screenfo/screenfo.conf";
+  }
+  elsif(-f "$ENV{HOME}/.config/screenfo/screenfo.conf") {
     $config = "$ENV{HOME}/.config/screenfo/screenfo.conf";
   }
   elsif(-f "$ENV{HOME}/.screenfo.conf") {
@@ -755,8 +767,22 @@ while taking the screenshot.
 
 =head1 ENVIRONMENT
 
-The configuration file should be placed in either /etc/screenfo.conf or
-$XDG_CONFIG_HOME/screenfo/screenfo.conf
+The configuration file is searched for in the following places:
+
+    $XDG_CONFIG_HOME/screenfo/screenfo.conf
+    $HOME/.config/screenfo/screenfo.conf
+    $HOME/.screenfo.conf
+    $HOME/screenfo.conf
+    ./screenfo.conf
+    /etc/screenfo.conf
+
+The files in the ascii/ directory is searched for in in the following places:
+
+    $XDG_DATA_HOME/screenfo/ascii
+    $HOME/.local/share/screenfo/ascii
+    $HOME/.screenfo/ascii
+    ./ascii
+    /usr/share/screenfo/ascii
 
 =head1 REQUIREMENTS
 
