@@ -1,14 +1,14 @@
 #!/usr/bin/perl
 my $APP = 'screenfo';
 use vars qw($VERSION);
-$VERSION = '0.295';
+$VERSION = '0.296';
 
 use strict;
 use List::Util qw(shuffle);
 use Getopt::Long;
 use Pod::Usage;
 
-use Term::ExtendedColor;
+use Term::ExtendedColor qw(fg bg);
 
 my $DEBUG = $ENV{DEBUG};
 
@@ -844,9 +844,5 @@ with this awesome name.
 =head1 SEE ALSO
 
 The original post: <https://bbs.archlinux.org/viewtopic.php?id=24208&p=10>
-
-screenFetch: <http://github.com/KittyKatt/screenFetch>
-
-archey: <http://github.com/djmelik/archey>
 
 =cut
