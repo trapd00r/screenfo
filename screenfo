@@ -513,41 +513,42 @@ sub colorme {
 sub get_wm {
   my $active_wm = 'Unknown';
   my %wm_list = (
-    Ratpoison     => 'ratpoison',
-    StumpWM       => 'stumpwm',
-    dwm           => 'dwm',
-    wmii          => 'wmii',
-    i3            => 'i3',
-    Openbox       => 'openbox',
-    Fluxbox       => 'fluxbox',
-    Blackbox      => 'blackbox',
-    FVWM          => 'fvwm',
-    Enlightenment => 'enlightenment',
-    IceWM         => 'icewm',
-    PekWM         => 'pekwm',
-    Musca         => 'musca',
-    WindowMaker   => 'wmaker',
-    Metacity      => 'metacity',
-    Kwin          => 'kwin',
-    Xfwm4         => 'xfwm4',
-    Beryl         => 'beryl',
-    Compiz        => 'compiz',
-    Matchbox      => 'hildon-desktop',
-    WMFS          => 'wmfs',
-    Xmonad        => 'xmonad.*',
-    Xfce          => 'xfce4-session',
-    KDE           => 'ksmserver',
-    GNOME         => 'gnome-session',
-    Sawfish       => 'sawfish',
+    ratpoison        => 'Ratpoison',
+    stumpwm          => 'StumpWM',
+    dwm              => 'dwm',
+    wmii             => 'wmii',
+    i3               => 'i3',
+    openbox          => 'Openbox',
+    fluxbox          => 'Fluxbox',
+    blackbox         => 'Blackbox',
+    fvwm             => 'FVWM',
+    enlightenment    => 'Enlightenment',
+    icewm            => 'IceWM',
+    pekwm            => 'PekWM',
+    musca            => 'Musca',
+    wmaker           => 'WindowMaker',
+    metacity         => 'Metacity',
+    kwin             => 'Kwin',
+    xfwm4            => 'Xfwm4',
+    beryl            => 'beryl',
+    compiz           => 'Compiz',
+    'hildon-desktop' => 'Matchbox',
+    WMFS             => 'WMFS',
+    'xfce4-session'  => 'Xfce',
+    ksmserver        => 'KDE', 
+    'gnome-session'  => 'GNOME', 
+    sawfish          => 'Sawfish',
+    ion3             => 'Ion3',
 
     # NOTE Not sure of their processes
-    EvilWM        => 'evil-wm',
-    ScrotWM       => 'scrot-wm',
-    Tritium       => 'tritium',
-    Euclid        => 'euclid',
-    Echinus       => 'echinus',
-    JWM           => 'jwm',
-    TWM           => 'twm',
+    'xmonad'      => 'Xmonad', # uses .<arch> prefixes ?
+    'evil-wm'     => 'EvilWM',
+    'scrot-wm'    => 'ScrotWM',
+    tritium       => 'Tritium',
+    euclid        => 'Euclid',
+    echinus       => 'Echinus',
+    jwm           => 'JWM',
+    twm           => 'TWM',
   );
   my %rev_wm = reverse(%wm_list);
 
@@ -556,14 +557,10 @@ sub get_wm {
   chomp(my @processes = <$ps>);
   close($ps);
 
-  for my $friendly_wm(keys(%wm_list)) {
-    for my $process(@processes) {
-      # used eq before I found out xmonad uses different process names
-      # for diff arch's
-      if($process =~ m;$wm_list{$friendly_wm};) {
-        $active_wm = $friendly_wm;
-        last;
-      }
+  for my $process(@processes) {
+    if(exists $wm_list{$process}) {
+      $active_wm = $wm_list{$process};
+      last;
     }
   }
   return($active_wm);
