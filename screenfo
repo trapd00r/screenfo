@@ -538,6 +538,7 @@ sub get_wm {
     Xfce          => 'xfce4-session',
     KDE           => 'ksmserver',
     GNOME         => 'gnome-session',
+    Sawfish       => 'sawfish',
 
     # NOTE Not sure of their processes
     EvilWM        => 'evil-wm',
