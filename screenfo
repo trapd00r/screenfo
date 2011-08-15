@@ -247,7 +247,7 @@ sub get_kernel {
   open(my $fh, '<', '/proc/version') or warn($!);
   my $version = <$fh>;
   # extended to match kernels [1-3]
-  my ($kernel) = $version =~ /([1-3]\.[0-9][\.0-9\S]+)/;
+  my ($kernel) = $version =~ /([1-3][.][0-9][.0-9\S]+)/;
   return($kernel);
 }
 
