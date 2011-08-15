@@ -538,6 +538,7 @@ sub get_wm {
     ksmserver        => 'KDE', 
     'gnome-session'  => 'GNOME', 
     sawfish          => 'Sawfish',
+    ion3             => 'Ion3',
 
     # NOTE Not sure of their processes
     'xmonad'      => 'Xmonad', # uses .<arch> prefixes ?
