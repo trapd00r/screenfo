@@ -570,6 +570,9 @@ sub get_os {
   if(-e '/etc/arch-release') {
     return("GNU/Linux (Arch Linux)");
   }
+  elsif(-e '/usr/bin/crux') {
+    return("GNU/Linux (CRUX)");
+  }
   elsif($^O eq 'linux') {
     return("GNU/Linux"); # be nice
   }
