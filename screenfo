@@ -65,8 +65,8 @@ sub logo_init {
 
 sub config_init {
   my $config;
-  if(-f "$ENV{XDG_CONFIG_HOME}/.config/screenfo/screenfo.conf") {
-    $config = "$ENV{HOME}/.config/screenfo/screenfo.conf";
+  if(-f "$ENV{XDG_CONFIG_HOME}/screenfo/screenfo.conf") {
+    $config = "$ENV{XDG_CONFIG_HOME}/screenfo/screenfo.conf";
   }
   elsif(-f "$ENV{HOME}/.config/screenfo/screenfo.conf") {
     $config = "$ENV{HOME}/.config/screenfo/screenfo.conf";
