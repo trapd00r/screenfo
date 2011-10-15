@@ -573,6 +573,13 @@ sub get_os {
   elsif(-e '/usr/bin/crux') {
     return("GNU/Linux (CRUX)");
   }
+  elsif(-e '/etc/debian_version') {
+		open FILE, "</etc/debian_version";
+		my $line = <FILE>;
+		$line =~ s/\s+$//;
+		close FILE;
+    return("GNU/Linux (Debian ${line})");
+  }
   elsif($^O eq 'linux') {
     return("GNU/Linux"); # be nice
   }
