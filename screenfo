@@ -288,9 +288,9 @@ sub get_gtk_info {
       $gtk_toolbar = $1;
     }
   }
-  return($gtk_theme)         if($wanted eq 'theme');
-  return($gtk_icons)         if($wanted eq 'icons');
-  return($gtk_font)          if($wanted eq 'font');
+  return($gtk_theme)   if($wanted eq 'theme');
+  return($gtk_icons)   if($wanted eq 'icons');
+  return($gtk_font)    if($wanted eq 'font');
   return($gtk_toolbar) if($wanted eq 'toolbar');
   return(-1);
 }
@@ -303,7 +303,7 @@ sub get_disk_total {
   open(my $df, '-|', 'df -h --total') or warn($!);
   my($size,$used,$avail,$percent);
   while(<$df>) {
-    if(/^total\s+([0-9.MGTP]+)\s+([0-9.MGTP]+)\s+([0-9.MGTP]+)\s+([0-9]+%)/) {
+    if(/^total\s+([0-9.,MGTP]+)\s+([0-9.,MGTP]+)\s+([0-9.,MGTP]+)\s+([0-9]+%)/) {
       ($size,$used,$avail,$percent) = ($1,$2,$3,$4);
       $percent =~ s/\%//;
 
