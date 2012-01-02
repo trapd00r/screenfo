@@ -539,6 +539,7 @@ sub get_wm {
     'gnome-session'  => 'GNOME', 
     sawfish          => 'Sawfish',
     ion3             => 'Ion3',
+    herbstluftwm     => 'Herbstluft',
 
     # NOTE Not sure of their processes
     'xmonad'      => 'Xmonad', # uses .<arch> prefixes ?
