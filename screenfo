@@ -278,6 +278,9 @@ sub get_gtk_info {
     if(/gtk-theme-name\s*=\s*"(.+)"/) {
       $gtk_theme = $1;
     }
+    elsif(/include\s*".+themes\/(.+)\/.+\/gtkrc/) {
+      $gtk_theme = $1;
+    }
     if(/gtk-icon-theme-name\s*=\s*"(.+)"/) {
       $gtk_icons = $1;
     }
