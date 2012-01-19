@@ -447,7 +447,7 @@ sub get_cpu {
     close($fh);
 
     for(@cpuinfo) {
-      if(/^Processor\s+:\s+(.+)/) {
+      if(/^Processor\s+:\s+(.+)/ or /^model\sname\s+:\s+(.+)/) {
         $cpu = $1;
         last;
       }
