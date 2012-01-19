@@ -577,11 +577,19 @@ sub get_os {
   elsif(-e '/usr/bin/crux') {
     return("GNU/Linux (CRUX)");
   }
+  elsif(-e '/etc/grml-version') {
+    open FILE, "</etc/grml-version";
+    my $line = <FILE>;
+    # $line =~ s/\s+$//;
+    $line =~ s/\s\[[-0-9]+\]\s+$//;
+    close FILE;
+    return("GNU/Linux (${line})");
+  }
   elsif(-e '/etc/debian_version') {
-		open FILE, "</etc/debian_version";
-		my $line = <FILE>;
-		$line =~ s/\s+$//;
-		close FILE;
+    open FILE, "</etc/debian_version";
+    my $line = <FILE>;
+    $line =~ s/\s+$//;
+    close FILE;
     return("GNU/Linux (Debian ${line})");
   }
   elsif($^O eq 'linux') {
