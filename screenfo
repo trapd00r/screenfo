@@ -579,16 +579,14 @@ sub get_os {
   }
   elsif(-e '/etc/grml-version') {
     open FILE, "</etc/grml-version";
-    my $line = <FILE>;
-    # $line =~ s/\s+$//;
-    $line =~ s/\s\[[-0-9]+\]\s+$//;
+    chomp(my $line = <FILE>);
+    $line =~ s/\s\[[-0-9]+\]//;
     close FILE;
     return("GNU/Linux (${line})");
   }
   elsif(-e '/etc/debian_version') {
     open FILE, "</etc/debian_version";
-    my $line = <FILE>;
-    $line =~ s/\s+$//;
+    chomp(my $line = <FILE>);
     close FILE;
     return("GNU/Linux (Debian ${line})");
   }
