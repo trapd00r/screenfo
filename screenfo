@@ -244,7 +244,7 @@ if($DEBUG) {
 }
 
 sub get_kernel {
-  if($^O =~ /.*bsd$/) {
+  if($^O =~ /bsd$/) {
     return(`uname -r`);
   }
   else {
@@ -426,11 +426,14 @@ sub get_uptime {
   }
 
   my ($hours) = $mins =~ m/(\d+):/;
+  $hours = 0 unless(defined($hours));
 
   # NOTE needs more testing
   if(defined($hours)) {
     $mins =~ s/$hours://; # ugly
   }
+
+  $mins =~ s/\smins//;
 
   return($days)  if($wanted eq 'days');
   return($hours) if($wanted eq 'hours');
@@ -626,6 +629,13 @@ sub get_os {
     chomp(my $line = <FILE>);
     close FILE;
     return("GNU/Linux (Debian ${line})");
+  }
+  elsif(-e '/etc/sabayon-edition') {
+    open FILE, "</etc/sabayon-edition";
+    chomp(my $line= <FILE>);
+    $line=~ s/^.*?(\w+)[.!?]?\s*$/$1/;
+    close FILE;
+    return("GNU/Linux (Sabayon ${line})");
   }
   elsif($^O eq 'linux') {
     return("GNU/Linux"); # be nice
