@@ -637,6 +637,9 @@ sub get_os {
     close FILE;
     return("GNU/Linux (Sabayon ${line})");
   }
+  elsif(-e '/etc/gentoo-release') {
+    return("GNU/Linux (Gentoo)");
+  }
   elsif($^O eq 'linux') {
     return("GNU/Linux"); # be nice
   }
