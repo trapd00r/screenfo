@@ -19,8 +19,9 @@ OPTIONS
       -c,   --color     specify colorscheme to use
       -l,   --list      list available colorschemes
       -a,   --ascii     specify ascii art to use
-      -n,   --noran     dont randomize the colors
-      -s    --shot      take screenshot
+      -r,   --random    randomize the colors
+      -s,   --shot      take screenshot
+      -d,   --debug     show debug info
 
       -h,   --help      show help and exit
       -v,   --version   show version info and exit
