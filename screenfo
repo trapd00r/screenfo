@@ -553,6 +553,7 @@ sub get_wm {
   my %wm_list = (
     ratpoison        => 'Ratpoison',
     stumpwm          => 'StumpWM',
+    'stumpwm.bin'    => 'StumpWM',
     dwm              => 'dwm',
     wmii             => 'wmii',
     i3               => 'i3',
