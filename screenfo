@@ -403,6 +403,15 @@ sub to_mb {
 }
 
 sub get_uptime {
+  if(-e '/proc/uptime') {
+    return &get_uptime_procfs;
+  }
+  else {
+    return &get_uptime_uptime;
+  }
+}
+
+sub get_uptime_uptime {
   my $wanted = shift;
   if(!defined($wanted)) {
     $wanted = 'days';
@@ -437,6 +446,36 @@ sub get_uptime {
   }
 
   $mins =~ s/\smins//;
+
+  return($days)  if($wanted eq 'days');
+  return($hours) if($wanted eq 'hours');
+  return($mins)  if($wanted eq 'mins');
+}
+
+sub get_uptime_procfs {
+  my ($up, $idle);
+  open(FILE, '</proc/uptime');
+  while(<FILE>) {
+    chomp;
+    ($up, $idle) = split('\s');
+  }
+  close(FILE);
+  my $return = sprintf('%d days, %d hours, %d mins, %d secs',
+         int($up/(24*60*60)),
+         ($up/(60*60))%24,
+         ($up/60)%60,
+         ($up%60)
+  );
+
+  my $days  = int($up/(24*60*60));
+  my $hours = ($up/(60*60))%24;
+  my $mins  = ($up/60)%60;
+  my $secs  = $up%60;
+
+  my $wanted = shift;
+  if(!defined($wanted)) {
+    $wanted = 'days';
+  }
 
   return($days)  if($wanted eq 'days');
   return($hours) if($wanted eq 'hours');
