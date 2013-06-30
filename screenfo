@@ -651,21 +651,18 @@ sub get_os {
     my $ver = `echo \`cmd /c ver\``;
     $ver =~ s/^.*\[Version (.*)\].*$/$1/;
     my $win = '';
-    if($ver =~ /^5\.0/) {
-      $win = '2000';
-    }
-    elsif($ver =~ /^5\.1/) {
-      $win = 'XP';
-    }
-    elsif($ver =~ /^6\.0/) {
-      $win = 'Vista';
-    }
-    elsif($ver =~ /^6\.1/) {
-      $win = '7';
-    }
-    elsif($ver =~ /^6\.2/) {
-      $win = '8';
-    }
+    # Windows version numbering: major.minor.build
+    # where major.minor corresponds to the name of the OS, and build changes
+    # for different releases under the same name.
+    if($ver =~ /^4\.0\./)   { $win = 'NT 4.0'; }
+    elsif($ver =~ /^4\.00/) { $win = '95'; }
+    elsif($ver =~ /^4\.10/) { $win = '98'; }
+    elsif($ver =~ /^5\.0/)  { $win = '2000'; }
+    elsif($ver =~ /^5\.1/)  { $win = 'XP'; }
+    elsif($ver =~ /^5\.2/)  { $win = 'XP 64'; }
+    elsif($ver =~ /^6\.0/)  { $win = 'Vista'; }
+    elsif($ver =~ /^6\.1/)  { $win = '7'; }
+    elsif($ver =~ /^6\.2/)  { $win = '8'; }
     return("Windows $win (Cygwin)");
   }
   else {
