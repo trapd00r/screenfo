@@ -312,6 +312,9 @@ sub get_disk_total {
   if($^O =~ /.*bsd$/) {
     open($df, '-|', 'df -h -c') or warn($!);
   }
+  elsif($^O eq 'cygwin') {
+    open($df, '-|', 'df -h --total /cygdrive/*') or warn($!);
+  }
   else {
     open($df, '-|', 'df -h --total') or warn($!);
   }
@@ -442,7 +445,15 @@ sub get_uptime {
 
 sub get_no_users {
   my %users;
-  chomp(my $u = `users`);
+
+  my $u = '';
+  if($^O eq 'cygwin') {
+    # Only XP Pro and later
+    chomp($u = `cmd /c wmic ComputerSystem Get UserName | grep -v UserName | head -1`);
+  }
+  else {
+    chomp($u = `users`);
+  }
   map { $users{$_}++ } split(/ /, $u);
 
   my @output;
