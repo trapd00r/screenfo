@@ -646,6 +646,10 @@ sub get_wm {
   if($^O =~ /.*bsd$/) {
     open($ps, '-|', 'ps -A|awk \'{print $5}\'') or(warn($!)); # ugly
   }
+  elsif($^O eq 'cygwin') {
+    open($ps, '-|', 'ps -a|awk \'{print $5}\'') or(warn($!)); # ugly
+
+  }
   else {
     open($ps, '-|', 'ps -A|awk \'{print $4}\'') or(warn($!)); # ugly
   }
