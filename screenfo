@@ -629,6 +629,7 @@ sub get_wm {
     sawfish          => 'Sawfish',
     ion3             => 'Ion3',
     herbstluftwm     => 'Herbstluft',
+    monsterwm        => 'monsterwm',
 
     # NOTE Not sure of their processes
     'xmonad'      => 'Xmonad', # uses .<arch> prefixes ?
