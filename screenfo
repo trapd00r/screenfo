@@ -647,8 +647,7 @@ sub get_wm {
     open($ps, '-|', 'ps -A|awk \'{print $5}\'') or(warn($!)); # ugly
   }
   elsif($^O eq 'cygwin') {
-    open($ps, '-|', 'ps -a|awk \'{print $5}\'') or(warn($!)); # ugly
-
+    open($ps, '-|', 'ps -a|awk \'{gsub(/\/.*\//,"",$8); print $8}\'') or(warn($!)); # _very_ ugly
   }
   else {
     open($ps, '-|', 'ps -A|awk \'{print $4}\'') or(warn($!)); # ugly
