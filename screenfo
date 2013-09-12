@@ -634,6 +634,8 @@ sub get_wm {
     ion3             => 'Ion3',
     herbstluftwm     => 'Herbstluft',
     monsterwm        => 'monsterwm',
+    'xmonad-x86_64-l' => 'Xmonad',
+    'xmonad-x86-l'   => 'Xmonad',
 
     # NOTE Not sure of their processes
     'xmonad'      => 'Xmonad', # uses .<arch> prefixes ?
@@ -697,7 +699,10 @@ sub get_os {
     return("GNU/Linux (Sabayon ${line})");
   }
   elsif(-e '/etc/gentoo-release') {
-    return("GNU/Linux (Gentoo)");
+    open FILE, "</etc/gentoo-release";
+    chomp(my $line = <FILE>);
+    close FILE;
+    return("GNU/Linux ($line)");
   }
   elsif($^O eq 'linux') {
     return("GNU/Linux"); # be nice
