@@ -17,6 +17,7 @@ our($now_playing, $default_colorscheme, %colorschemes, $default_logo,
     $color_support);
 our($opt_shot) = undef;
 our($randomize_colors); # 0 disables the randomizing (default)
+our(@df_exclude);
 
 config_init();
 
@@ -309,7 +310,7 @@ sub get_disk_total {
     $wanted = 'size';
   }
   my $exclude;
-  foreach(qw/rootfs devtmpfs tmpfs cgroup_root shm/) {
+  foreach(@df_exclude) {
     $exclude .= "-x $_ ";
   }
   my $df;
