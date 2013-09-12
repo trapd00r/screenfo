@@ -308,15 +308,19 @@ sub get_disk_total {
   if(!defined($wanted)) {
     $wanted = 'size';
   }
+  my $exclude;
+  foreach(qw/rootfs devtmpfs tmpfs cgroup_root shm/) {
+    $exclude .= "-x $_ ";
+  }
   my $df;
   if($^O =~ /.*bsd$/) {
     open($df, '-|', 'df -h -c') or warn($!);
   }
   elsif($^O eq 'cygwin') {
-    open($df, '-|', 'df -h --total /cygdrive/*') or warn($!);
+    open($df, '-|', 'df '.$exclude.' -h --total /cygdrive/*') or warn($!);
   }
   else {
-    open($df, '-|', 'df -h --total') or warn($!);
+    open($df, '-|', 'df '.$exclude.' -h --total') or warn($!);
   }
   my($size,$used,$avail,$percent);
   while(<$df>) {
