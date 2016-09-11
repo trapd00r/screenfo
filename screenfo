@@ -50,6 +50,9 @@ sub logo_init {
   elsif(-f "$ENV{HOME}/.local/share/screenfo/ascii/$logo") {
     $default_logo = "$ENV{HOME}/.local/share/screenfo/ascii/$logo";
   }
+  elsif(-f "$ENV{XDG_CONFIG_HOME}/screenfo/ascii/$logo") {
+    $default_logo = "$ENV{XDG_CONFIG_HOME}/screenfo/ascii/$logo";
+  }
   elsif(-f "$ENV{HOME}/.screenfo/ascii/$logo") {
     $default_logo = "$ENV{HOME}/.screenfo/ascii/$logo";
   }
@@ -935,6 +938,7 @@ The configuration file is searched for in the following places:
 The files in the ascii/ directory is searched for in in the following places:
 
     $XDG_DATA_HOME/screenfo/ascii
+    $XDG_CONFIG_HOME/screenfo/ascii
     $HOME/.local/share/screenfo/ascii
     $HOME/.screenfo/ascii
     ./ascii
