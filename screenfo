@@ -633,7 +633,7 @@ sub get_wm {
     WMFS             => 'WMFS',
     'xfce4-session'  => 'Xfce',
     ksmserver        => 'KDE',
-    'gnome-session'  => 'GNOME',
+    'gnome-session-b'  => 'GNOME',
     sawfish          => 'Sawfish',
     ion3             => 'Ion3',
     notion           => 'Notion',
