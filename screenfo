@@ -854,6 +854,12 @@ for(@$output) {
   }
 }
 if($opt_shot) {
+  $| = 1; # Disable output buffering
+
+  for (1..2) {
+    print '';
+    sleep 1;
+  }
   #FIXME - scrot, import...
   my($s, $m, $h, $d, $month, $y) = localtime(time());
   $y += 1900;
@@ -861,6 +867,7 @@ if($opt_shot) {
   $m     = sprintf("%02d", $m);
   $s     = sprintf("%02d", $s);
   system('scrot', "$y-$month-$d-$h$m$s-screenfo.png") == 0 or(warn($!));
+  print "Saved as $y-$month-$d-$h$m$s-screenfo.png \n";
   exit(0);
 }
 
