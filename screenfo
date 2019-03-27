@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 my $APP = 'screenfo';
 use vars qw($VERSION);
-$VERSION = '0.297';
+$VERSION = '0.298';
 
 use strict;
 use List::Util qw(shuffle);
@@ -610,6 +610,7 @@ sub get_wm {
   my $active_wm = 'Unknown';
   my %wm_list = (
     ratpoison        => 'Ratpoison',
+    catpoison        => 'Catpoison',
     stumpwm          => 'StumpWM',
     'stumpwm.bin'    => 'StumpWM',
     dwm              => 'dwm',
